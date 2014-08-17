@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:views="views.*" width="100%" xmlns:assets="assets.*" includeInLayout="{this.globals.incomingCallFrom != null}" visible="{this.globals.incomingCallFrom != null}" xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			import assets.accept;
+			import assets.reject;
+			import assets.yellowbutton;
+			
+			import model.Globals;
+			
+			import spark.components.ViewNavigator;
+			
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+			
+			[Bindable]
+			public var navigator:ViewNavigator;
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				this.globals.remoteUser = this.globals.incomingCallFrom;	
+				this.globals.incomingCallFrom = null;
+				this.globals.remoteUser.handleUserRequest();
+				
+				var param : Object = new Object();
+				param.user = this.globals.remoteUser;
+				param.action = "accept";
+				param.chatOnly = false;
+				if (this.sendVideo)
+				{
+					param.chatOnly = (this.sendVideo.selected ? false : true);
+				}
+				
+				if (navigator)
+				{
+					navigator.pushView(views.VideoPage, param);
+				}
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				var remoteId:String = this.globals.incomingCallFrom.id;
+				this.globals.callManager.rejectIncomingCall(remoteId);
+				
+				//reaches here only when user is not in a call
+				this.globals.callManager.resetCallState(remoteId); 
+				this.globals.incomingCallFrom = null;
+			}
+			
+			public function onActivate():void
+			{
+			}
+			
+			public function onDeActivate():void
+			{
+
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="mini"/>
+	</s:states>
+	
+	<s:BorderContainer backgroundAlpha="0.2" backgroundColor="black"  width="100%" >
+		
+		<s:VGroup paddingBottom="6" paddingTop="6" paddingLeft="30" paddingRight="30" width="100%">
+			
+			<views:InfoBar message="Incoming call" currentState="info" includeInLayout="true" />
+			
+			<s:HGroup verticalAlign="middle" width="100%">
+				
+				<s:HGroup width="100%" includeIn="normal">
+					<s:CheckBox id="sendVideo" label="Send Video?" selected="true" />
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<assets:accept width="64" height="64" click="button1_clickHandler(event)" />
+					<assets:reject width="64" height="64" click="button2_clickHandler(event)"/>				
+				</s:HGroup>
+
+				<mx:Spacer width="20%" includeIn="mini" />
+				
+				<s:Image source="{this.globals.incomingCallFrom.photo}" skinClass="skins.HeasdshotSkin" width="79" height="79"/>
+				
+				<s:VGroup>					
+					<s:Label text="{this.globals.incomingCallFrom.nick}"/>
+					<s:Label text="{this.globals.incomingCallFrom.description}"/>
+				</s:VGroup>
+				
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

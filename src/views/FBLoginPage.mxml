@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Facebook login" creationComplete="view1_creationCompleteHandler(event)">
+	
+	<s:states>
+		<s:State name="loggedout"/>
+		<s:State name="loggedin"/>
+	</s:states>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.facebook.*;
+			import com.facebook.graph.data.FacebookSession;
+			
+			import components.InformationBox;
+			
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			
+			import p2p.UserObject;
+			
+			private var FB_LOGGED_IN:Boolean=false;
+			private var user:Object = new Object();
+
+			private var globals :Globals = Globals.getInstance();
+			
+			protected function loginHandler(fbSession:FacebookSession,fail:Object):void
+			{
+				if(fbSession){    
+					currentState="loggedin"; 
+
+					var fbUser:UserObject = new UserObject();
+					fbUser.nick = fbSession.user.name;
+					fbUser.realName = fbSession.user.first_name + " " + fbSession.user.last_name;
+					fbUser.deviceType = Capabilities.cpuArchitecture;
+					fbUser.photo = FacebookMobile.getImageUrl(fbSession.uid,"small");	
+					fbUser.description = fbSession.user.birthday;
+					
+					this.webView.hide();
+					
+					navigator.popAll();
+					navigator.pushView(views.SFHMobileHome);
+					
+					InformationBox.show(this, InformationBox.IC_INFO, "Success", "You have logged into Facebook - " + fbUser.nick);
+				} 
+				else{    
+					this.login(); 
+				}
+			}
+			protected function login():void
+			{
+				FacebookMobile.login(loginHandler, this.webView.stageWebView,["user_birthday","read_stream","publish_stream"]);
+			}
+
+			protected function logout():void
+			{
+				FacebookMobile.logout();
+				currentState="loggedout";
+			}
+
+			protected function submitPost(str:String):void
+			{
+				FacebookMobile.api("/me/feed",submitPostHandler,{message:str}, "POST");
+			}
+			
+			protected function submitPostHandler(result:Object,fail:Object):void
+			{
+				trace("post done");
+			}
+
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				FacebookMobile.init("160889450602889",loginHandler);
+			}
+
+		]]>
+	</fx:Script>
+	<components:WebView xmlns:components="components.*" id="webView"  />
+</s:View>

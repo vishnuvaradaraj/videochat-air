@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:components="components.*"
+		xmlns:pbay="services.parabay.*" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Report User" xmlns:mx="library://ns.adobe.com/flex/mx">
+
+	<fx:Script>
+		<![CDATA[
+			import assets.sfhicon;
+			
+			import components.InformationBox;
+			
+			import model.Globals;
+			
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PUser;
+			
+			import spark.events.ViewNavigatorEvent;
+						
+			private var globals :Globals = Globals.getInstance();
+
+			private var user:P2PUser ;
+			
+			import model.ActionBarItems;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			import mx.events.FlexEvent;
+			
+			protected function handleBusy(isBusy:Boolean):void
+			{
+				this.busyIndicator.busy = isBusy;
+				this.reportButton.enabled = !isBusy;
+				this.username.enabled = !isBusy;
+				this.comments.enabled = !isBusy;				
+			}
+
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (value is P2PUser)
+					this.user = value as P2PUser;
+			}
+			
+			protected function reportButton_clickHandler(event:MouseEvent):void
+			{
+				this.handleBusy(true);
+				reportUserResult.token = parabayService.submitFeedback(this.globals.token, "Abuse", this.username.text, this.comments.text);
+			}
+
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.messages = true;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				if (this.user)
+				{
+					this.username.text = this.user.nick;
+					this.username.enabled = false;
+				}
+			}
+			
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+			}
+
+
+			protected function reportUserResult_resultHandler(event:ResultEvent):void
+			{
+				this.handleBusy(false);
+				InformationBox.show(this, InformationBox.IC_INFO, "Info", "Feedback submitted successfully.");
+				navigator.popView();
+			}
+
+
+			protected function reportUserResult_faultHandler(event:FaultEvent):void
+			{
+				this.handleBusy(false);
+				InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Failed to submit feedback.");
+			}
+
+		]]>
+	</fx:Script>
+
+	
+	<fx:Declarations>
+		<s:CallResponder id="reportUserResult" result="reportUserResult_resultHandler(event)" fault="reportUserResult_faultHandler(event)" />
+		<pbay:Parabay id="parabayService"/>
+	</fx:Declarations>	
+	
+	<s:VGroup width="100%" paddingLeft="10" paddingTop="35" paddingRight="20" paddingBottom="20" gap="5">
+		<s:VGroup width="100%">
+			<s:Label text="Username"/>			
+			<s:TextInput id="username" width="100%"/>			
+		</s:VGroup>
+		
+		<s:VGroup width="100%" paddingTop="10">
+			<s:Label text="Comments"/>
+			<s:TextArea id="comments" width="100%" height="200"/>
+		</s:VGroup>
+		
+		<s:HGroup width="100%" horizontalAlign="right" paddingTop="5">
+			<mx:Spacer width="100%"/>
+			
+			<components:BusyIndicator id="busyIndicator" busy="false"  
+									   width="79" height="79"  />
+			
+			<s:Button id="reportButton" label="Report User" click="reportButton_clickHandler(event)" color="0xE8E8E8"/>	
+		</s:HGroup>
+	</s:VGroup>
+
+</s:View>

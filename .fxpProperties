@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" parentProject="e6545360-b6ec-4919-a24b-201234404701" projectUUID="e6545360-b6ec-4919-a24b-201234404701" pureCatalystProject="false" sdkVersion="4.5.0" uuid="33c14b21-30ee-4753-8f50-efa3baab5c51" version="15">
+  <projects>
+    <project filename="as3lib_1.fxpl" position="0" projectUUID="e1c39ea0-91c6-4888-8288-83e0c0465f62" uuid="33c14b21-30ee-4753-8f50-efa3baab5c51"/>
+  </projects>
+  <src/>
+  <swc>
+    <linked location="${BLACKBERRY_TABLET_SDK}/frameworks/libs/blackberry" path="${BLACKBERRY_TABLET_SDK}/frameworks/libs/blackberry" position="6" uuid="40e5abac-a291-466f-8e22-bcc77b24eb97"/>
+    <linked location="${BLACKBERRY_TABLET_SDK}/frameworks/libs/qnx-screen" path="${BLACKBERRY_TABLET_SDK}/frameworks/libs/qnx-screen" position="8" uuid="40e5abac-a291-466f-8e22-bcc77b24eb97"/>
+    <linked location="${BLACKBERRY_TABLET_SDK}/frameworks/libs/air/qnx-air.swc" path="${BLACKBERRY_TABLET_SDK}/frameworks/libs/air/qnx-air.swc" position="9" uuid="40e5abac-a291-466f-8e22-bcc77b24eb97"/>
+    <linked location="${DCD_LOCALE_LOCATION}" path="${DCD_LOCALE_LOCATION}" position="1" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+    <linked location="${DCD_LIB_LOCATION}" path="${DCD_LIB_LOCATION}" position="2" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="3" uuid="33c14b21-30ee-4753-8f50-efa3baab5c51"/>
+    <linked location="${DCD_FIBER_LOCATION}/playerfds.swc" path="${DCD_FIBER_LOCATION}/playerfds.swc" position="4" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+    <linked location="E:/parabay/parabay/SFHMobile/libs" path="/libs" position="5" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+    <linked location="${DCD_FIBER_LOCALE_LOCATION}/fiber_rb.swc" path="${DCD_FIBER_LOCALE_LOCATION}/fiber_rb.swc" position="6" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+    <linked location="${DCD_FIBER_LOCATION}/fiber.swc" path="${DCD_FIBER_LOCATION}/fiber.swc" position="7" uuid="4c6e438f-1bec-409a-903a-2ce3ba2f4188"/>
+  </swc>
+  <misc/>
+  <theme/>
+  <mxmlFormattingPrefs groupAttributesByState="true" maxLineWidth="100" mxmlAlignAttributes="true" mxmlAttributeOrder="id,userLabel,includeIn,excludeFrom,visible,x,y,z,left,right,top,bottom,width,height,minWidth,minHeight,maxWidth,maxHeight,label" mxmlKeepAttributeValuesOrganized="true"/>
+</fxpProperties>

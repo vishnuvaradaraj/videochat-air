@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:pbay="services.parabay.*" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		title="{this.globals.currentUser.nick}" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:views="views.*" xmlns:assets="assets.*" xmlns:components="components.*">
+	
+	<fx:Declarations>
+		<pbay:Parabay id="parabayService" />
+	</fx:Declarations>	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.messages;
+			
+			import com.adobe.serialization.json.JSON;
+			import com.adobe.serializers.utility.TypeUtility;
+			
+			import components.InformationBox;
+			
+			import model.ActionBarItems;
+			import model.FriendsList;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.PropertyChangeEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.UserObject;
+			
+			import spark.core.NavigationUnit;
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			import spark.layouts.VerticalLayout;
+			
+			import valueObjects.UpdatePeerResult;
+			
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+								
+			[Bindable]
+			private var message:String = null;
+			
+			public function refresh():void
+			{
+				trace("refresh clicked.");
+				this.globals.friendsList.getData(false);
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{ 
+				var p2pUser :P2PUser = list.selectedItem as P2PUser;
+				if (P2PSession.myUser != null && p2pUser.id != P2PSession.myUser.id)
+				{
+					navigator.pushView(UserDetailsPage, list.selectedItem);
+				}
+				else
+				{
+					list.selectedIndex = -1;
+				}
+			}
+			
+			public function search():void
+			{
+				this.searchView.includeInLayout = true;
+				this.searchView.visible = true;
+				this.invalidateDisplayList();
+			}
+			
+			public function back():void
+			{
+				if (!this.searchView.isDefault)
+				{
+					this.searchView.resetToDefaults();
+					this.searchView.search();
+				}
+			}
+			
+			public function more():void
+			{
+				if (!this.globals.friendsList.getData(true))
+				{
+					InformationBox.show(this, InformationBox.IC_INFO, "Info", "No more data available.");
+				}
+			}
+				
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.home = false;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = true;
+				this.globals.actionBarItems.messages = true;
+				this.globals.actionBarItems.more = true;
+				this.globals.actionBarItems.back = navigator.length>1;
+				this.globals.actionBarItems.settings = true;
+				this.globals.actionBarItems.chat = true;
+				if (this.globals.currentUser.nick == 'support')
+				{
+					this.globals.actionBarItems.refresh = true;
+				}
+				
+				this.searchView.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, this.onSearchDefaultsChangeHandler);
+				
+				this.inCallsPage.onActivate();
+				this.globals.friendsList.init(this, navigator);
+				
+				var clientVersion:int = Globals.getInstance().serverSettings.clientVersion;
+				if (clientVersion > Globals.getInstance().CLIENT_VERSION)
+				{
+					this.message = "Please upgrade your client";
+				}
+				
+				var msg:String = Globals.getInstance().serverSettings.message;
+				if (msg && msg.length > 0)
+				{
+					this.message = msg;
+				}
+				
+				list.scroller.viewport.addEventListener( PropertyChangeEvent.PROPERTY_CHANGE, layoutPropertyChangeHandler );
+			}
+
+			protected function onSearchDefaultsChangeHandler(event:PropertyChangeEvent):void
+			{
+				if (this.searchView.isDefault)
+				{
+					this.globals.actionBarItems.home = false;
+				}
+				else
+				{
+					this.globals.actionBarItems.home = true;
+				}
+			}
+
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+				
+				this.searchView.removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE, this.onSearchDefaultsChangeHandler);
+				list.scroller.viewport.removeEventListener( PropertyChangeEvent.PROPERTY_CHANGE, layoutPropertyChangeHandler );
+				
+				this.globals.friendsList.deinit();
+				this.inCallsPage.onDeActivate();
+			}
+
+			protected function layoutPropertyChangeHandler(event:PropertyChangeEvent):void
+			{
+				if ( event.property == "verticalScrollPosition" ) {
+					if ( event.newValue == ( event.currentTarget.measuredHeight - event.currentTarget.height )) {
+						trace( "scrolled to end" );
+						if (!this.globals.friendsList.loading) {
+							trace( "loading more data..." );
+							this.globals.friendsList.getData(true);
+						}
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+	</s:states>
+	
+	<s:VGroup width="100%" height="100%" gap="2">
+
+		<views:InfoBar id="messageBar" width="100%" currentState="info" message="{this.message}" includeInLayout="{this.message != null}" visible="{this.message != null}"/>
+
+		<views:InfoBar id="infoBar" width="100%" currentState="error" message="Failed to load data" includeInLayout="{this.globals.friendsList.hasErrors}" visible="{this.globals.friendsList.hasErrors}"/>
+
+		<views:InCallsPage id="inCallsPage" width="100%" navigator="{navigator}" />
+		
+		<components:StatusBar id="titleBar" navigator="{this.navigator}" />
+
+		
+		<views:SearchUsersView id="searchView" includeInLayout="false" visible="false" currentState="{this.currentState}" />
+		
+		<s:Scroller width="100%" height="100%" includeInLayout="{this.globals.friendsList.list.length>0}" visible="{this.globals.friendsList.list.length>0}" >
+			<s:Group >			
+				<s:List id="list" top="0" bottom="0" left="0" right="0" change="list_changeHandler(event)"  width="100%">
+					<s:AsyncListView list="{this.globals.friendsList.list}"/>
+					<s:itemRenderer>
+						<fx:Component>
+							<s:IconItemRenderer 
+								paddingTop="8" paddingBottom="8" verticalGap="6"
+								labelField="title" 
+								iconField="photo" iconHeight="79" iconWidth="79"
+								messageField="message" decorator="{assets.Chevron}" >
+								<fx:Script>
+									<![CDATA[
+										import assets.Chevron;
+									]]>
+								</fx:Script>
+							</s:IconItemRenderer>
+
+							
+						</fx:Component>
+					</s:itemRenderer> 
+					
+				</s:List>	
+			</s:Group>
+		</s:Scroller>
+		
+		<s:RichText id="noUsers" text="No users matching your search key." textAlign="center" left="20" right="20" includeInLayout="{this.globals.friendsList.list.length==0}" visible="{this.globals.friendsList.list.length==0}" paddingLeft="30" paddingTop="30"/>
+
+	</s:VGroup>
+	
+
+
+</s:View>

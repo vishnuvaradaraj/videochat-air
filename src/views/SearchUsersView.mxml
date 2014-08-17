@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  gap="15" xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" xmlns:assets="assets.*">
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serialization.json.JSON;
+			import com.adobe.serializers.utility.TypeUtility;
+			
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			
+			private var globals :Globals = Globals.getInstance();
+			
+			[Bindable]
+			public static var SEARCH_TEXT:String = "Search for user"; 
+
+			[Bindable]
+			public var genderList:ArrayCollection = new ArrayCollection(
+				[ 	{gender:"Female", value:1},
+					{gender:"Male", value:2},
+					{gender:"Any", value:3} ]);
+
+			[Bindable]
+			public var isDefault:Boolean = true;
+			
+			public function resetToDefaults():void
+			{
+				this.searchKey.text = "";
+				this.gender.selectedIndex = 2;
+				this.isOnline.selected = false;
+				this.hasPhoto.selected = false;
+				this.isHuman.selected = true;
+
+			}
+			
+			public function search():void
+			{
+				this.includeInLayout = false;
+				this.visible = false;
+				
+				var sql :String = " WHERE ";
+				
+				var q : Object = new Object();
+				q.kind = "Friends_User";
+				q.columns = [];
+				q.filters = [];
+				q.orders = [];
+				
+				this.isDefault = true;
+				
+				var approved : int = 1;
+				//if (this.globals.currentUser.nick == "support")
+				approved = (this.isHuman.selected ? 1 : 0);
+				
+				var filterApproved :Object = new Object();
+				filterApproved.condition = "approved =";
+				filterApproved.param =  approved.toString();
+				filterApproved.type = "string";
+				q.filters.push(filterApproved);
+				sql += "approved = " + approved + " ";
+				
+				if (approved)
+				{
+					this.globals.approvedDefault = 1;
+				}
+				else
+				{
+					this.globals.approvedDefault = 0;
+					this.isDefault = false;
+				}
+				
+				if (searchKey.text != SEARCH_TEXT && searchKey.text != "")
+				{
+					this.isDefault = false;
+					
+					var filter :Object = new Object();
+					filter.condition = "nick =";
+					filter.param = searchKey.text;
+					filter.type = "string";
+					q.filters.push(filter);
+					
+					sql += " AND nick LIKE '%" + searchKey.text + "%' ";
+				}
+				
+				var gender : String = this.gender.selectedItem.gender;
+				if (gender == "Male" || gender == "Female")
+				{
+					this.isDefault = false;
+					
+					var filterGender :Object = new Object();
+					filterGender.condition = "gender =";
+					filterGender.param = gender;
+					filterGender.type = "string";
+					q.filters.push(filterGender);
+					
+					sql += " AND gender ='" + gender + "' ";
+				}
+				
+				/*
+				if (this.minAge.value != 18 || this.maxAge.value != 99)
+				{
+					var filter1 :Object = new Object();
+					filter1.condition = "age >";
+					filter1.param = this.minAge.value.toString();
+					filter1.type = "string";
+					q.filters.push(filter1);
+					
+					var filter2 :Object = new Object();
+					filter2.condition = "age <";
+					filter2.param = this.maxAge.value.toString();
+					filter2.type = "string";
+					q.filters.push(filter2);
+				}
+				*/
+				
+				if (this.isOnline.selected)
+				{
+					this.isDefault = false;
+					sql += " AND isOnline=1";
+				}
+				
+				if (this.hasPhoto.selected)
+				{
+					this.isDefault = false;
+					
+					/*
+					var filterPhoto :Object = new Object();
+					filterPhoto.condition = "photo >";
+					filterPhoto.param = "";
+					filterPhoto.type = "string";
+					q.filters.push(filterPhoto);
+					
+					q.orders = ["photo"];
+					*/
+					
+					sql += " AND photo != 'male.png' AND photo != 'female.png' ";
+				}
+				
+				var ret :String = com.adobe.serialization.json.JSON.encode(q);
+				this.globals.userCache.whereClause = sql;
+				this.globals.friendsList.query = ret;
+				
+				this.includeInLayout = false;
+			}
+
+			protected function cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				this.includeInLayout = false;
+			}
+
+		]]>
+	</fx:Script>
+
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+	</s:states>
+	
+	<s:HGroup width="100%" paddingTop="10" paddingLeft="20" paddingRight="20"  paddingBottom="5" horizontalAlign="center">
+		<s:Button  id="cancelBtn" label="Back" click="cancelBtn_clickHandler(event)" height="{searchBtn.height}" />
+
+		<s:TextInput id="searchKey" width="{width - searchBtn.width - cancelBtn.width - 66}" height="{searchBtn.height}"
+					 text="{SEARCH_TEXT}" focusIn="searchKey.text=''" enter="search()"/>
+		<s:Button id="searchBtn" icon="@Embed('assets/search.png')" label="Go"
+				  click="search()"/>
+	</s:HGroup>
+	
+	<s:HGroup width="100%" paddingLeft="30" paddingRight="30" horizontalAlign="center">
+		<mx:Spacer width="10%" includeIn="portrait" />
+		<s:Label text="Gender" paddingTop="10"/>
+		<s:DropDownList id="gender" prompt="Select One" selectedIndex="2"
+						height="54" dataProvider="{genderList}" width="100%"
+						labelField="gender"/>
+		<mx:Spacer width="10%" includeIn="portrait" />
+	</s:HGroup>
+
+	<!--
+	<s:HGroup width="100%" paddingLeft="30" paddingRight="30" >
+		<mx:Spacer width="20%" />
+		<s:Label text="Min age" paddingTop="5" /> 
+		<s:NumericStepper id="minAge" value="18" minimum="16" maximum="100" />
+		<mx:Spacer width="100%" />
+		<s:Label text="Max age" paddingTop="5" />
+		<s:NumericStepper id="maxAge" value="99" minimum="16" maximum="100" />
+		<mx:Spacer width="20%" />
+	</s:HGroup>
+	-->
+	
+	<s:HGroup width="100%" paddingLeft="30" paddingRight="30" horizontalAlign="center">
+		<s:CheckBox id="hasPhoto" label="Has Photo?" width="33%" />
+		<s:CheckBox id="isOnline" label="Is Online?" width="33%" />
+		<s:CheckBox id="isHuman" label="is Human?" width="33%" selected="true" includeInLayout="{width>500}" visible="{width>500}" />
+	</s:HGroup>
+
+</s:VGroup>

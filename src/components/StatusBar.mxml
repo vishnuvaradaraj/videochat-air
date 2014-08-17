@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup  paddingTop="5" width="100%" click="hgroup1_clickHandler(event)" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" xmlns:assets="assets.*" xmlns:mx="library://ns.adobe.com/flex/mx">
+
+	<fx:Script>
+		<![CDATA[
+			import events.PeerStatusEvent;
+			
+			import model.FriendsList;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.PropertyChangeEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.UserObject;
+			
+			import spark.components.ViewNavigator;
+			
+			import views.ChatRoomPage;
+			import views.UserDetailsPage;
+
+			[Bindable]
+			public var navigator:ViewNavigator;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();					
+
+			protected function onCallUser():void
+			{
+				if (this.globals.recentUsers.isPrivateMessage)
+				{
+					var p2pUser:P2PUser = this.globals.recentUsers.getCurrentUser();
+					if (p2pUser)
+					{
+						navigator.pushView(UserDetailsPage, p2pUser);
+					}
+				}
+				else
+				{
+					navigator.pushView(views.ChatRoomPage);
+				}
+			}
+			
+			protected function hgroup1_clickHandler(event:MouseEvent):void
+			{
+				this.onCallUser();
+			}
+
+			protected function image1_clickHandler(event:MouseEvent):void
+			{
+				var p2pUser:P2PUser = this.globals.recentUsers.getCurrentUser();
+				if (p2pUser)
+				{
+					navigator.pushView(UserDetailsPage, p2pUser);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<assets:sfhicon width="44" height="44" includeInLayout="{this.globals.recentUsers.currentUserObj == null}" visible="{this.globals.recentUsers.currentUserObj == null}" />
+	
+	<s:HGroup paddingLeft="15" paddingTop="8" includeInLayout="{this.globals.recentUsers.currentUserObj != null}" visible="{this.globals.recentUsers.currentUserObj != null}" >
+		<s:Image source="{this.globals.recentUsers.currentUserObj.photo}" width="44" height="44" />		
+	</s:HGroup>
+
+	<s:HGroup paddingTop="15">
+		<s:Button skinClass="skins.LinkButtonSkin" label="{this.globals.recentUsers.user}"   />	
+	</s:HGroup>
+
+	<s:Label text="{this.globals.recentUsers.message}" fontWeight="bold"  paddingTop="15"/>
+
+	<s:HGroup paddingLeft="15" paddingTop="12" includeInLayout="{this.globals.recentUsers.currentUserObj != null}" visible="{this.globals.recentUsers.currentUserObj != null}" >
+		<s:Image source="@Embed(source='assets/phone.png')" width="40" height="40" click="image1_clickHandler(event)"/>		
+	</s:HGroup>
+
+	<mx:Spacer width="100%"/>	
+</s:HGroup>

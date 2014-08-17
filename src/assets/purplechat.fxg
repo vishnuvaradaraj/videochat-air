@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Graphic version="2.0" viewHeight="81" viewWidth="73" ai:appVersion="15.0.0.399" ATE:version="1.0.0" flm:version="1.0.0" d:id="1" d:using="" xmlns="http://ns.adobe.com/fxg/2008" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+  <Library/>
+  <Group ai:artboardActive="1" ai:artboardIndex="0" ai:seqID="1" d:layerType="page" d:pageHeight="81" d:pageWidth="73" d:type="layer" d:userLabel="Artboard 1">
+    <Group ai:objID="283d8e90" ai:seqID="2" d:id="2" d:type="layer" d:userLabel="Layer 1">
+      <Group x="3.18359" y="3.66748" ai:objID="2a3acca0" ai:seqID="3">
+        <Path winding="nonZero" ai:objID="283ec380" ai:seqID="4" data="M36.6797 48.2915 9.69336 48.2915C4.34863 48.2915 0 43.9419 0 38.5981L0 9.69336C0 4.34961 4.34863 0 9.69336 0L56.4902 0C61.8359 0 66.1836 4.34961 66.1836 9.69336L66.1836 38.5981C66.1836 43.9243 61.8652 48.2603 56.5469 48.2915L60.3262 68.4712 36.6797
+ 48.2915Z">
+          <fill>
+            <SolidColor color="#FFFFFF"/>
+          </fill>
+        </Path>
+        <Path x="1.625" y="1.62598" winding="nonZero" ai:objID="2a3f4310" ai:seqID="5" data="M35.6523 45.0386 8.06836 45.0386C3.61914 45.0386 0 41.4214 0 36.9722L0 8.06738C0 3.61816 3.61914 0 8.06836 0L54.8652 0C59.3145 0 62.9336 3.61816 62.9336 8.06738L62.9336 36.9722C62.9336 41.4214 59.3145 45.0386 54.8652 45.0386L52.9629 45.0386 56.2578
+ 62.6206 35.6523 45.0386Z">
+          <fill>
+            <RadialGradient x="31.4668" y="46.5103" scaleX="55.9692" scaleY="55.9692">
+              <GradientEntry ratio="0" color="#FF00E6"/>
+              <GradientEntry ratio="1" color="#A8009F"/>
+            </RadialGradient>
+          </fill>
+        </Path>
+        <Path x="1.625" y="1.62598" winding="nonZero" ai:objID="2c9633d0" ai:seqID="6" data="M54.8652 0 8.06836 0C3.61914 0 0 3.61816 0 8.06738L0 13.3955C7.54004 18.8525 18.8359 22.3237 31.4668 22.3237 44.0977 22.3237 55.3945 18.8535 62.9336 13.3955L62.9336 8.06738C62.9336 3.61816 59.3145 0 54.8652 0Z">
+          <fill>
+            <LinearGradient x="31.4668" y="22.3237" scaleX="22.3237" rotation="270">
+              <GradientEntry ratio="0" color="#B500A8"/>
+              <GradientEntry ratio="1" color="#E9A1E3"/>
+            </LinearGradient>
+          </fill>
+        </Path>
+      </Group>
+    </Group>
+  </Group>
+  <Private>
+      <ai:PrivateElement d:ref="#1">
+        <ai:SaveOptions>
+          <ai:Dict data="B includeXMP 0 B writeImages 1 I preserveTextPolicy 4 I preserveFilterPolicy 3 I preserveGradientPolicy 4 B clipToActiveArtboard 1 I expandBlendsOption 5 I rasterizeResolution 72 B downsampleLinkedImages 0 B includeObjectOutsideArtboard 0 B aiEditCap 1 B includeSymbol 0 I versionKey 2 "/>
+        </ai:SaveOptions>
+        <ai:DocData base="purplechat.assets/images" rulerCanvasDiffH="36.5" rulerCanvasDiffV="40.5">
+          <ai:DocRasterSettings>
+            <ai:Dict data="I dpi. 72 R padd 36 I colr 4 B spot 0 B mask 0 B alis 0 "/>
+          </ai:DocRasterSettings>
+        </ai:DocData>
+        <ai:AutoGenImageList>
+          <ai:Dict/>
+        </ai:AutoGenImageList>
+      </ai:PrivateElement>
+      <ai:PrivateElement flm:hashcode="CBA15FBE53902D338BDB8A787DBF0B77" d:ref="#2">
+        <ai:LayerOptions color="5 79.31 257 128.502"/>
+      </ai:PrivateElement>
+    </Private>
+  </Graphic>

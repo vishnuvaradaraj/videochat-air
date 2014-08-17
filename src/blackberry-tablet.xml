@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<qnx>
+   <!-- Settings for the application's initial window. Required. -->
+
+   <initialWindow>
+      <systemChrome>none</systemChrome>
+      <transparent>false</transparent>
+   </initialWindow>
+
+   <!-- Publisher name. Must match exactly to the publisher company set up with the BlackBerry dev portal. -->
+   <publisher>Parabay Inc</publisher>
+   <!-- This category value is used to place the application. options include: core.media, core.games, etc -->
+   <category>core.media</category>
+   <!-- Custom icon that shows up on the main screen of the PlayBook. Default is 90x90 -->
+
+   <icon>
+      <image>blackberry-tablet-icon.png</image>
+   </icon>
+
+   <permission>record_audio</permission>
+   <permission>read_geolocation</permission>
+   <permission>use_camera</permission>
+   <permission>access_internet</permission>
+   <permission>play_audio</permission>
+   <permission>set_audio_volume</permission>
+</qnx>

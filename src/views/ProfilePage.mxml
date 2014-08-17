@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="components.*"
+		xmlns:pbay="services.parabay.*" creationComplete="view1_creationCompleteHandler(event)" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Register" xmlns:views="views.*" xmlns:ipinfo="services.ipinfo.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.greenbutton;
+			import assets.sfhicon;
+			
+			import com.adobe.serialization.json.JSON;
+			import com.adobe.serializers.utility.TypeUtility;
+			
+			import events.UserStatusEvent;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import services.ipinfo.IpInfo;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			
+			import valueObjects.UpdatePeerResult;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+			
+			private var nick : String = null;
+			private var locn:String= "";
+						
+			[Bindable]
+			private var friend : Object = new Object();
+			
+			[Bindable]
+			public var genderList:ArrayCollection = new ArrayCollection(
+				[ 	{gender:"Female", value:1},
+					{gender:"Male", value:2},
+					{gender:"Unspecified", value:3} ]);
+						
+			protected function handleBusy(isBusy:Boolean):void
+			{
+				this.busyIndicator.busy = isBusy;
+				this.loginButton.enabled = !isBusy;
+				this.age.enabled = !isBusy;
+				this.gender.enabled = !isBusy;
+				this.description.enabled = !isBusy;
+				
+			}
+			
+			protected function toScreen(friend:Object):void
+			{
+				if (friend.age)
+				{
+					this.age.value = friend.age;
+				}
+
+				if (friend.gender && (friend.gender == "Male" || friend.gender == "Female"))
+				{
+					this.gender.selectedValue = friend.gender;
+				}
+				else
+				{
+					this.gender.selectedValue = "Female";
+				}
+				
+				if (friend.description)
+				{
+					this.description.text = friend.description;
+				}
+				
+				if (friend.location && friend.location.length>0)
+				{
+					this.locn = friend.location;
+				}
+
+			}
+			
+			protected function fromScreen():Object
+			{
+				var friend :Object = new Object();
+				friend.name = this.data.name;
+				friend.nick = this.data.name;
+				if (this.globals.lastUpload && this.globals.lastUpload.substr(0,4) == "http")
+				{
+					friend.photo = this.globals.lastUpload;
+				}
+				else
+				{
+					friend.photo = "";
+				}
+				friend.emailAddress = this.data.email;
+				friend.age = this.age.value;
+				friend.gender = this.gender.selectedValue;
+				friend.description = this.description.text;
+				if (this.description.text.length == 0)
+				{
+					friend.description = this.location.text;
+				}				
+				friend.location = this.locn;
+				friend.approved = '1';
+				
+				return friend;
+			}
+			
+			protected function registerButton_clickHandler(event:MouseEvent):void
+			{
+				this.handleBusy(true);
+				
+				//this user is not approved yet.
+				var settings:UpdatePeerResult = Globals.getInstance().serverSettings;
+				settings.approved = 0;
+				
+				var token :String = globals.token;								
+				friend = this.fromScreen();
+				
+				var jsonf : String = com.adobe.serialization.json.JSON.encode(friend);
+				saveFriendResult.token = parabayService.saveFriend(this.globals.token, jsonf);
+			}
+			
+			protected function parabayService_faultHandler(event:FaultEvent):void
+			{
+				trace("Failed to call register service");
+				
+				this.handleBusy(false);
+				
+				infoBar.includeInLayout = true;
+				infoBar.currentState = "error";
+				infoBar.message = "Failed to contact server.";
+				
+			}
+			
+			protected function onConnect(event:*):void
+			{
+				this.handleBusy(false);
+					
+				if (navigator)
+				{
+					navigator.popAll();
+					navigator.pushView(views.SFHMobileHome);
+				}
+			}
+			
+			protected function onDisconnect(event:*):void
+			{
+				trace("disconnected p2p session");
+				this.handleBusy(false);
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				ipResult.token = ipInfo.lookupIpInfo("1769c1a82d197bfe1a4588caa42bf9a737b8175ecbc2e4c6eb53f8ec8c6c0443", "", "false", "json");
+				
+				if (this.data && this.data.hasOwnProperty('name'))
+				{
+					this.title = this.data.name;
+				}
+				
+				this.globals.userManager.addEventListener(UserStatusEvent.CONNECTED, this.onConnect);
+				this.globals.userManager.addEventListener(UserStatusEvent.DISCONNECTED, this.onDisconnect);
+
+			}
+			
+			
+			protected function ipInfo_resultHandler(event:ResultEvent):void
+			{
+				trace(event.result.RegionName);
+				this.locn = String(event.result.Latitude) + "," + String(event.result.Longitude);
+				
+				if (location.text == "")
+				{
+					location.text = event.result.City + ", " + event.result.CountryName;
+				}
+			}
+			
+			
+			protected function saveFriendResult_resultHandler(event:ResultEvent):void
+			{
+				
+				this.handleBusy(false);
+				
+				if ( event.result.status == 0 ) 
+				{
+					infoBar.includeInLayout = false;
+					this.handleBusy(true);
+					
+					this.globals.p2pLoginUser(friend);
+					
+					//navigator.popAll();
+					//navigator.pushView(views.SFHMobileHome);
+				}				
+				else
+				{
+					trace("Register failure");	
+					infoBar.includeInLayout = true;
+					infoBar.currentState = "error";
+					infoBar.message = "Failed to register user";
+				}	
+			}									
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				navigator.pushView(views.PhotoPage, this);
+			}
+			
+
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.home = false;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = false;
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				if (this.globals.registerUserCache)
+				{
+					this.toScreen(this.globals.registerUserCache);
+					this.globals.registerUserCache = null;
+				}
+			}
+
+
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+				
+				this.globals.registerUserCache = this.fromScreen();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<pbay:Parabay id="parabayService"  fault="parabayService_faultHandler(event)"/>
+		
+		<s:CallResponder id="saveFriendResult" result="saveFriendResult_resultHandler(event)" />
+		
+		<s:CallResponder id="ipResult" />
+		<ipinfo:IpInfo id="ipInfo" result="ipInfo_resultHandler(event)" />
+		
+		<s:RadioButtonGroup id="gender"/>
+	</fx:Declarations>	
+	
+	
+	<s:VGroup width="100%" height="100%" paddingLeft="0" paddingTop="0" paddingRight="0" paddingBottom="0" gap="0">
+		
+		<views:InfoBar id="infoBar" width="100%" currentState="error" message="hello world"/>
+		
+		
+		<s:Scroller width="100%" height="100%">
+			<s:Group> 
+				<s:VGroup width="100%" height="100%">	
+					
+					<s:VGroup width="100%" paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="30" gap="5">
+						
+						<s:HGroup verticalAlign="middle" gap="12" paddingBottom="20">
+							
+							<s:BorderContainer width="81" height="81" borderColor="white">
+								<s:Image source="{this.globals.lastUpload}" skinClass="skins.HeasdshotSkin" width="79" height="79"/>
+							</s:BorderContainer>
+							
+							<s:VGroup>
+								<s:Button label="Choose photo" click="button2_clickHandler(event)" />
+							</s:VGroup>
+							
+						</s:HGroup>
+												
+						<s:VGroup  width="100%">
+							<s:Label text="Gender"/>
+							<s:HGroup>
+								<s:RadioButton label="Male" groupName="gender"/>
+								<s:RadioButton label="Female" groupName="gender"/>
+							</s:HGroup>
+						</s:VGroup>
+						<s:VGroup  width="100%">
+							<s:Label text="Age"/>
+							<s:NumericStepper id="age" value="18" minimum="18" maximum="100" />
+						</s:VGroup>
+						<s:VGroup  width="100%">
+							<s:Label text="Location"/>
+							<s:TextInput id="location" width="100%" />
+						</s:VGroup>
+						
+						<s:VGroup width="100%" paddingTop="10">
+							<s:Label text="Description"/>
+							<s:TextArea id="description" width="100%" />
+						</s:VGroup>
+						
+						<s:HGroup width="100%" horizontalAlign="right" paddingTop="5">
+							<mx:Spacer width="100%" />
+							<components:BusyIndicator id="busyIndicator" busy="false"  
+													   width="79" height="79"  />
+							
+							
+							<s:Button id="loginButton" label="Finish" click="registerButton_clickHandler(event)" color="0xE8E8E8"/>	
+						</s:HGroup>
+					</s:VGroup>
+					
+				</s:VGroup>	
+				
+			</s:Group>        
+		</s:Scroller> 
+		
+	</s:VGroup>	
+</s:View>

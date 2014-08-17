@@ -1,0 +1,1142 @@
+
+<model xmlns="http://ns.adobe.com/Fiber/1.0">
+  <annotation name="ActionScriptGeneration">
+    <item name="FullyQualifyReferences">true</item>
+  </annotation>
+  <entity name="Data">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Data</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="Description" type="string" required="true"/>
+    <property name="Age" type="integer" required="true"/>
+    <property name="bookmark" type="string" required="true"/>
+    <property name="Location" type="string" required="true"/>
+    <property name="org" type="string" required="true"/>
+    <property name="LastName" type="string" required="true"/>
+    <property name="Photo" type="string" required="true"/>
+    <property name="id" type="string" required="true"/>
+    <property name="PrimaryPhone" type="string" required="true"/>
+    <property name="Status" type="string" required="true"/>
+    <property name="updated" type="string" required="true"/>
+    <property name="created" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="Gender" type="string" required="true"/>
+    <property name="owner" type="string" required="true"/>
+    <property name="EmailAddress" type="string" required="true"/>
+    <property name="FirstName" type="string" required="true"/>
+    <property name="Interests" type="string" required="true"/>
+    <property name="Nick" type="string" required="true"/>
+  </entity>
+  <entity name="CheckUserIdResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">CheckUserIdResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="checkUserID">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="status" type="integer" required="true"/>
+  </entity>
+  <entity name="ListQueueResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ListQueueResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="listQueue">
+      <item name="propertySpecifier">sync_token,count,status,data</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="sync_token" type="string" required="true"/>
+    <property name="count" type="integer" required="true"/>
+    <property name="status" type="integer" required="true"/>
+    <property name="data" type="QueueData[]" required="true"/>
+  </entity>
+  <entity name="QueueData">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Data</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="string" required="true"/>
+    <property name="tags" type="string" required="true"/>
+    <property name="bookmark" type="string" required="true"/>
+    <property name="isPrivate" type="string" required="true"/>
+    <property name="created" type="string" required="true"/>
+    <property name="updated" type="string" required="true"/>
+    <property name="targetUser" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="owner" type="string" required="true"/>
+    <property name="secret" type="string" required="true"/>
+    <property name="org" type="string" required="true"/>
+    <property name="comments" type="string" required="true"/>
+  </entity>
+  <service name="IpInfo">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">HTTPMultiService</item>
+      <item name="Package">services.ipinfo</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">HTTPService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="LINKED_FILE"></item>
+    </annotation>
+    <function name="lookupIpInfo" return-type="IpInfoResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">GET</item>
+        <item name="url">http://api.ipinfodb.com/v2/ip_query.php</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://api.ipinfodb.com/v2/ip_query.php?key=1769c1a82d197bfe1a4588caa42bf9a737b8175ecbc2e4c6eb53f8ec8c6c0443&amp;ip=74.125.45.100&amp;timezone=true&amp;output=json</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">Ip,CountryName,RegionName,Isdst,City,Status,Dstoffset,Timezone,Latitude,Longitude,CountryCode,Gmtoffset,TimezoneName,RegionCode,ZipPostalCode</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">key,ip,timezone,output</item>
+        <item name="inputParams">string,string,string,string</item>
+      </annotation>
+      <parameter name="key" type="string"/>
+      <parameter name="ip" type="string"/>
+      <parameter name="timezone" type="string"/>
+      <parameter name="output" type="string"/>
+    </function>
+    <function name="lookupLocation" return-type="GeonamesResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+        <item name="method">GET</item>
+        <item name="url">http://ws.geonames.org/findNearbyPlaceName</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://ws.geonames.org/findNearbyPlaceName?lat=47.3&amp;lng=9</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">geoname</item>
+      </annotation>
+      <annotation name="Properties">
+        <item name="xPath">/</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParamNames">lat,lng</item>
+        <item name="inputParams">string,string</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="lat" type="string"/>
+      <parameter name="lng" type="string"/>
+    </function>
+  </service>
+  <entity name="GeonamesResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Geonames</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">IpInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="lookupLocation">
+      <item name="propertySpecifier">geoname</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="geoname" type="Geoname" required="true"/>
+  </entity>
+  <entity name="Geoname">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Geoname</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">IpInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="toponymName" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="lat" type="string" required="true"/>
+    <property name="lng" type="string" required="true"/>
+    <property name="geonameId" type="string" required="true"/>
+    <property name="countryCode" type="string" required="true"/>
+    <property name="countryName" type="string" required="true"/>
+    <property name="fcl" type="string" required="true"/>
+    <property name="fcode" type="string" required="true"/>
+    <property name="distance" type="string" required="true"/>
+  </entity>
+  <entity name="IpInfoResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">IpInfoResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">IpInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="lookupIpInfo">
+      <item name="propertySpecifier">Ip,CountryName,RegionName,Isdst,City,Status,Dstoffset,Timezone,Latitude,Longitude,CountryCode,Gmtoffset,TimezoneName,RegionCode,ZipPostalCode</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="Ip" type="string" required="true"/>
+    <property name="CountryName" type="string" required="true"/>
+    <property name="RegionName" type="string" required="true"/>
+    <property name="Isdst" type="string" required="true"/>
+    <property name="City" type="string" required="true"/>
+    <property name="Status" type="string" required="true"/>
+    <property name="Dstoffset" type="string" required="true"/>
+    <property name="Timezone" type="string" required="true"/>
+    <property name="Latitude" type="string" required="true"/>
+    <property name="Longitude" type="string" required="true"/>
+    <property name="CountryCode" type="string" required="true"/>
+    <property name="Gmtoffset" type="string" required="true"/>
+    <property name="TimezoneName" type="string" required="true"/>
+    <property name="RegionCode" type="string" required="true"/>
+    <property name="ZipPostalCode" type="string" required="true"/>
+  </entity>
+  <service name="Parabay">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">HTTPMultiService</item>
+      <item name="Package">services.parabay</item>
+      <item name="rootURL">http://parabayapps.appspot.com</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">HTTPService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="LINKED_FILE"></item>
+    </annotation>
+    <function name="loginUser" return-type="LoginUserResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/login</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/login</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">email,token,status,name,friend</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">username,password,friend</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <parameter name="username" type="string"/>
+      <parameter name="password" type="string"/>
+      <parameter name="friend" type="string"/>
+    </function>
+    <function name="logoutUser" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/logout</item>
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/logout</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+    </function>
+    <function name="registerUser" return-type="RegisterUserResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/register_user</item>
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/register_user</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">user,app</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">email,token,status,name</item>
+      </annotation>
+      <parameter name="user" type="string"/>
+      <parameter name="app" type="string"/>
+    </function>
+    <function name="forgotPassword" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/forgot_password</item>
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/forgot_password</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">email</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <parameter name="email" type="string"/>
+    </function>
+    <function name="deleteUser" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/delete_user</item>
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/delete_user</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+    </function>
+    <function name="listFriends" return-type="ListFriendsResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/list/ParabayOrg-Friends</item>
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,query,bookmark</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">sync_token,count,status,data</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="query" type="string"/>
+      <parameter name="bookmark" type="string"/>
+    </function>
+    <function name="saveFriend" return-type="SaveDataResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/save/ParabayOrg-Friends/Friends_User</item>
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/save/ParabayOrg-Friends/Friends_User</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,data</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,status</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="data" type="string"/>
+    </function>
+    <function name="listQueue" return-type="ListGroupResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">sync_token,count,status,data</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,query,bookmark</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="query" type="string"/>
+      <parameter name="bookmark" type="string"/>
+    </function>
+    <function name="saveQueue" return-type="SaveDataResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/save/ParabayOrg-Friends/Friends_Queue</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/save/ParabayOrg-Friends/Friends_Queue</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,data</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="data" type="string"/>
+    </function>
+    <function name="listBuddies" return-type="ListBuddyResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">sync_token,count,status,data</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,query,bookmark</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="query" type="string"/>
+      <parameter name="bookmark" type="string"/>
+    </function>
+    <function name="saveBuddy" return-type="SaveDataResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/save/ParabayOrg-Friends/Friends_Buddy</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/save/ParabayOrg-Friends/Friends_Buddy</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,data</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="data" type="string"/>
+    </function>
+    <function name="listGroups" return-type="ListGroupResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/list/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">sync_token,count,status,data</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,query</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="query" type="string"/>
+    </function>
+    <function name="saveGroup" return-type="SaveDataResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/save/ParabayOrg-Friends/Friends_Group</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/save/ParabayOrg-Friends/Friends_Group</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,data</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="data" type="string"/>
+    </function>
+    <function name="checkUserID" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/check_userid</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/check_userid</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">userid</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <parameter name="userid" type="string"/>
+    </function>
+    <function name="initUpload" return-type="InitUploadResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">GET</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/assets/init_upload/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/assets/init_upload/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">uploadUrl,id,status,fileUrl</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+    </function>
+    <function name="updatePeerId" return-type="UpdatePeerResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/update_peer/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/update_peer/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">message,approved,disableServer,status,pulseInterval,disablePeer,clientVersion</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,peerId</item>
+        <item name="inputParams">string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="peerId" type="string"/>
+    </function>
+    <function name="submitFeedback" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/submit_feedback/ParabayOrg-Friends</item>
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/submit_feedback/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,msgtype,message,target</item>
+        <item name="inputParams">string,string,string,string</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="msgtype" type="string"/>
+      <parameter name="message" type="string"/>
+      <parameter name="target" type="string"/>
+    </function>
+    <function name="approveUser" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/approve_user/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/approve_user/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token,nick,approved</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="nick" type="string"/>
+      <parameter name="approved" type="string"/>
+    </function>
+    <function name="fixupData" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/fixup/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/fixup/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">token</item>
+        <item name="inputParams">string</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+    </function>
+    <function name="saveStats" return-type="StatusResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.xml.XMLSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/save_user_stats</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/save_user_stats</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+        <item name="inputParamNames">stats,app,token</item>
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+      <parameter name="stats" type="string"/>
+      <parameter name="app" type="string"/>
+      <parameter name="token" type="string"/>
+    </function>
+    <function name="userDetails" return-type="UserDetailsResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="ActionScriptGeneration">
+        <item name="SerializationFilter">com.adobe.serializers.json.JSONSerializationFilter</item>
+        <item name="method">POST</item>
+        <item name="contentType">application/x-www-form-urlencoded</item>
+        <item name="requestBodyParameter">false</item>
+        <item name="url">/api/user_details/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="url group">
+        <item name="completeURL">http://parabayapps.appspot.com/api/user_details/ParabayOrg-Friends</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">status,friend</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParamNames">token,nick</item>
+        <item name="inputParams">string,string</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <parameter name="token" type="string"/>
+      <parameter name="nick" type="string"/>
+    </function>
+  </service>
+  <entity name="BuddyData">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Data</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="string" required="true"/>
+    <property name="tags" type="string" required="true"/>
+    <property name="bookmark" type="string" required="true"/>
+    <property name="nick" type="string" required="true"/>
+    <property name="created" type="string" required="true"/>
+    <property name="updated" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="owner" type="string" required="true"/>
+    <property name="secret" type="string" required="true"/>
+    <property name="org" type="string" required="true"/>
+    <property name="photo" type="string" required="true"/>
+  </entity>
+  <entity name="ListBuddyResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ListBuddyResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="listBuddies">
+      <item name="propertySpecifier">sync_token,count,status,data</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="sync_token" type="string" required="true"/>
+    <property name="count" type="integer" required="true"/>
+    <property name="status" type="integer" required="true"/>
+    <property name="data" type="BuddyData[]" required="true"/>
+  </entity>
+  <entity name="ListFriendsResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ListFriendsResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="listFriends">
+      <item name="propertySpecifier">sync_token,count,status,data</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="sync_token" type="string"/>
+    <property name="count" type="integer"/>
+    <property name="status" type="integer"/>
+    <property name="data" type="FriendList[]"/>
+  </entity>
+  <entity name="LoginUserResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">LoginUserResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="loginUser">
+      <item name="propertySpecifier">email,token,status,name,friend</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="email" type="string"/>
+    <property name="token" type="string"/>
+    <property name="status" type="integer"/>
+    <property name="name" type="string"/>
+    <property name="friend" type="Friend"/>
+  </entity>
+  <entity name="ListGroupResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ListGroupResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="listGroups">
+      <item name="propertySpecifier">sync_token,count,status,data</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="listQueue">
+      <item name="propertySpecifier">sync_token,count,status,data</item>
+    </annotation>
+    <property name="sync_token" type="string"/>
+    <property name="count" type="integer"/>
+    <property name="status" type="integer"/>
+    <property name="data" type="GroupData[]"/>
+  </entity>
+  <entity name="InitUploadResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">InitUploadResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="initUpload">
+      <item name="propertySpecifier">uploadUrl,id,status,fileUrl</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="url" type="string" required="true"/>
+    <property name="uploadUrl" type="string" required="true"/>
+    <property name="id" type="string" required="true"/>
+    <property name="status" type="integer"/>
+    <property name="fileUrl" type="string" required="true"/>
+  </entity>
+  <entity name="RegisterUserResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RegisterUserResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="registerUser">
+      <item name="propertySpecifier">email,token,status,name</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="email" type="string" required="true"/>
+    <property name="token" type="string" required="true"/>
+    <property name="status" type="integer" required="true"/>
+    <property name="name" type="string" required="true"/>
+  </entity>
+  <entity name="Friend">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Friend</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="description" type="string"/>
+    <property name="age" type="string"/>
+    <property name="gender" type="string"/>
+    <property name="approved" type="integer" required="true"/>
+    <property name="nick" type="string"/>
+    <property name="peerId" type="string" required="true"/>
+    <property name="location" type="string"/>
+    <property name="updated" type="string" required="true"/>
+    <property name="photo" type="string"/>
+  </entity>
+  <entity name="GroupData">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Data</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="groupId" type="string" required="true"/>
+    <property name="nick" type="string" required="true"/>
+    <property name="description" type="string" required="true"/>
+    <property name="tags" type="string" required="true"/>
+    <property name="sourcePhoto" type="string" required="true"/>
+    <property name="bookmark" type="string"/>
+    <property name="location" type="string" required="true"/>
+    <property name="itemType" type="string" required="true"/>
+    <property name="targetUser" type="string" required="true"/>
+    <property name="org" type="string"/>
+    <property name="id" type="string"/>
+    <property name="updated" type="string"/>
+    <property name="created" type="string"/>
+    <property name="isPrivate" type="string" required="true"/>
+    <property name="name" type="string"/>
+    <property name="owner" type="string"/>
+    <property name="secret" type="string"/>
+    <property name="comments" type="string" required="true"/>
+  </entity>
+  <entity name="FriendList">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Data</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="primaryPhone" type="string" required="true"/>
+    <property name="realName" type="string" required="true"/>
+    <property name="bookmark" type="string"/>
+    <property name="peerId" type="string" required="true"/>
+    <property name="location" type="string"/>
+    <property name="emailAddress" type="string"/>
+    <property name="org" type="string"/>
+    <property name="photo" type="string"/>
+    <property name="id" type="string"/>
+    <property name="lastLogin" type="string" required="true"/>
+    <property name="nick" type="string"/>
+    <property name="updated" type="string"/>
+    <property name="created" type="string"/>
+    <property name="description" type="string"/>
+    <property name="age" type="integer"/>
+    <property name="name" type="string"/>
+    <property name="owner" type="string"/>
+    <property name="gender" type="string"/>
+  </entity>
+  <entity name="UserDetailsResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">UserDetailsResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="userDetails">
+      <item name="propertySpecifier">status,friend</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="status" type="integer" required="true"/>
+    <property name="friend" type="Friend" required="true"/>
+  </entity>
+  <entity name="StatusResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">StatusResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="forgotPassword">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="deleteUser">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="checkUserID">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="logoutUser">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="registerUser">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="updatePeerId">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="approveUser">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="fixupData">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="saveStats">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <annotation name="submitFeedback">
+      <item name="propertySpecifier">status</item>
+    </annotation>
+    <property name="status" type="integer"/>
+  </entity>
+  <entity name="SaveDataResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SaveDataResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="saveBuddy">
+      <item name="propertySpecifier">id,status</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="saveFriend">
+      <item name="propertySpecifier">id,status</item>
+    </annotation>
+    <annotation name="saveGroup">
+      <item name="propertySpecifier">id,status</item>
+    </annotation>
+    <annotation name="saveQueue">
+      <item name="propertySpecifier">id,status</item>
+    </annotation>
+    <property name="id" type="string"/>
+    <property name="status" type="integer"/>
+  </entity>
+  <entity name="UpdatePeerResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">UpdatePeerResult</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Parabay</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="updatePeerId">
+      <item name="propertySpecifier">message,approved,disableServer,status,pulseInterval,disablePeer,clientVersion</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="message" type="string" required="true"/>
+    <property name="approved" type="integer"/>
+    <property name="disableServer" type="integer"/>
+    <property name="status" type="integer"/>
+    <property name="pulseInterval" type="integer"/>
+    <property name="disablePeer" type="integer"/>
+    <property name="clientVersion" type="integer"/>
+  </entity>
+</model>

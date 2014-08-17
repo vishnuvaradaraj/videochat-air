@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" xmlns="library://ns.adobe.com/flex/spark" scaleGridTop="10" scaleGridBottom="20" scaleGridLeft="30" scaleGridRight="50">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+		<Path winding="nonZero" data="M6.87207 48.9248C3.39355 47.3096 1.09473 43.8076 1.09473 39.8525L1.09473 10.0103C1.09473 4.4917 5.58496 0 11.1025 0L59.4224 0C64.939 0 69.4282 4.4917 69.4282 10.0103L69.4282 39.8525C69.4282 45.3721 64.939 49.8623 59.4224 49.8623L22.9404 49.8623
+			  0 65.7041 6.87207 48.9248Z">
+			<fill>
+				<SolidColor color="#FFFFFF"/>
+			</fill>
+		</Path>
+		<Path x="2.77344" y="1.6792" winding="nonZero" data="M6.31738 46.2593C2.69434 45.3569 0 42.0737 0 38.1733L0 8.33105C0 3.7373 3.73633 0 8.3291 0L56.6489 0C61.2407 0 64.9771 3.7373 64.9771 8.33105L64.9771 38.1733C64.9771 42.7671 61.2407 46.5034 56.6489 46.5034L19.6445 46.5034 0.919922 59.4331 6.31738
+			  46.2593Z">
+			<fill>
+				<RadialGradient x="34.0093" y="53.0229" scaleX="62.2657" scaleY="62.2657">
+					<GradientEntry ratio="0" color="#70CAC9"/>
+					<GradientEntry ratio="1" color="#1072BA"/>
+				</RadialGradient>
+			</fill>
+		</Path>
+		<Path x="2.77344" y="1.6792" winding="nonZero" data="M56.6489 0 8.3291 0C3.73633 0 0 3.7373 0 8.33105L0 15.4717C7.42383 20.5645 18.9668 23.8418 31.9399 23.8418 45.5718 23.8418 57.6226 20.2246 64.9771 14.6846L64.9771 8.33105C64.9771 3.7373 61.2407 0 56.6489 0Z">
+			<fill>
+				<LinearGradient x="32.4888" y="23.8418" scaleX="23.8418" rotation="270">
+					<GradientEntry ratio="0" color="#0E85C1"/>
+					<GradientEntry ratio="1" color="#C2E0EF"/>
+				</LinearGradient>
+			</fill>
+		</Path>
+
+
+</s:Group>

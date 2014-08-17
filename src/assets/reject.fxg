@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Graphic version="2.0" viewHeight="48" viewWidth="48" ai:appVersion="15.0.0.399" ATE:version="1.0.0" flm:version="1.0.0" d:id="1" d:using="" xmlns="http://ns.adobe.com/fxg/2008" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+  <Library/>
+  <Group ai:artboardActive="1" ai:artboardIndex="0" ai:seqID="1" d:layerType="page" d:pageHeight="48" d:pageWidth="48" d:type="layer" d:userLabel="Artboard 1">
+    <Group ai:objID="2be41140" ai:seqID="2" d:id="2" d:type="layer" d:userLabel="Layer 1">
+      <Group x="3.84668" y="3.91748" ai:objID="2dd7f320" ai:seqID="3">
+        <Ellipse y="-0.000488281" width="40.3486" height="40.3486" ai:objID="2dd7a0a0" ai:seqID="4" flm:variant="1" d:id="3">
+          <fill>
+            <LinearGradient x="0" y="20.1748" scaleX="40.3486">
+              <GradientEntry ratio="0" color="#F36E21"/>
+              <GradientEntry ratio="0.345403" color="#F36C22"/>
+              <GradientEntry ratio="0.58771" color="#F26325"/>
+              <GradientEntry ratio="0.804223" color="#F0512B"/>
+              <GradientEntry ratio="1" color="#EE3435"/>
+            </LinearGradient>
+          </fill>
+        </Ellipse>
+        <Path x="2.01416" y="2.01416" winding="nonZero" ai:objID="2dd6f960" ai:seqID="5" flm:variant="2" d:id="4" data="M18.1606 36.3203C8.14648 36.3203 0 28.1738 0 18.1597 0 8.146 8.14648 0 18.1606 0 28.1743 0 36.3208 8.146 36.3208 18.1597 36.3208 28.1738 28.1743 36.3203 18.1606 36.3203L18.1606 36.3203Z">
+          <fill>
+            <RadialGradient x="15.3818" y="27.7793" scaleX="49.8122" scaleY="49.8122">
+              <GradientEntry ratio="0" color="#F36B21"/>
+              <GradientEntry ratio="0.521472" color="#EC2227"/>
+              <GradientEntry ratio="0.717353" color="#DE2227"/>
+              <GradientEntry ratio="1" color="#C02126"/>
+            </RadialGradient>
+          </fill>
+        </Path>
+        <Group x="8.00586" y="9.27832" ai:objID="2dd7f480" ai:seqID="6">
+          <Path x="4.98584" winding="nonZero" ai:objID="2dd79870" ai:seqID="7" data="M18.1401 9.2583C18.1675 9.2915 18.1929 9.32129 18.2192 9.33936 18.8823 9.59131 19.353 10.231 19.353 10.981 19.353 11.625 19.0073 12.186 18.4897 12.4917 17.771 13.0698 16.4683 13.4214 14.9819 13.6001 12.5698 13.8911 9.89795 13.8159 9.89795 13.8159
+ 9.89795 13.8159 10.5015 15.4741 11.2554 16.4292 12.0083 17.3833 12.6323 19.3394 12.812 21.0503 13.0132 22.9604 12.3999 23.7651 12.2085 24.0659 11.856 24.6187 11.1675 24.8491 10.5015 24.4155 9.97607 24.0767 9.84912 22.5083 8.84326 20.5991 7.83789
+ 18.689 6.12939 16.8804 3.76855 15.3237 1.44336 13.7905 1.30762 11.5044 1.30762 11.5044L0 11.5044 0 2.06006 2.71338 2.20996C2.71338 2.20996 3.46777 2.15967 4.32129 1.55811 5.17578 0.95459 6.38086 0 8.79443 0 10.3062 0 11.6147 0.236816 12.605 0.413574
+L15.1909 0.714844C15.9546 0.714844 16.5737 1.3335 16.5737 2.09814 16.5737 2.57275 16.3354 2.98975 15.9722 3.23975 15.9985 3.28125 16.0269 3.32275 16.0513 3.3667L16.2866 3.3667C17.146 3.3667 18.144 4.06201 18.144 4.92236 18.144 5.5332 17.7866 6.05615
+ 17.2749 6.31104 18.0562 6.40967 18.9634 7.06885 18.9634 7.87646 18.9634 8.47412 18.6294 8.98779 18.1401 9.2583Z">
+            <fill>
+              <SolidColor color="#FFFFFF"/>
+            </fill>
+          </Path>
+          <Path x="-4.29153e-05" y="0.903809" winding="nonZero" ai:objID="28edf320" ai:seqID="8" data="M1.1685 11.2041 4.08207 11.2041 4.08207 0C4.08207 0 1.52006 0.552734 0.365277 0.552734 -0.791461 0.552734 1.1685 11.2041 1.1685 11.2041ZM1.2642 2.11133C1.2642 1.61035 1.66948 1.20605 2.16948 1.20605 2.6685 1.20605 3.07329 1.61035 3.07329 2.11133
+ 3.07329 2.61035 2.6685 3.01465 2.16948 3.01465 1.66948 3.01465 1.2642 2.61035 1.2642 2.11133Z">
+            <fill>
+              <SolidColor color="#FFFFFF"/>
+            </fill>
+          </Path>
+        </Group>
+      </Group>
+    </Group>
+  </Group>
+  <Private variant:using="" mngo:using="" xmlns:mngo="http://ns.adobe.com/flamingo/apd" xmlns:variant="http://ns.adobe.com/flame/2008/apd">
+    <mngo:VariantContent fpdNS="http://ns.adobe.com/flame/2008/apd" fpdPRE="variant" flm:hashcode="F0C9699F7C6F7A196FFA3AFBE51E8171" flm:original="1" d:ref="#3">
+      <variant:Ellipse y="-0.000488281" width="40.3486" height="40.3486" ai:objID="2dd7a0a0" ai:seqID="4">
+        <variant:fill>
+          <variant:LinearGradient x="0" y="20.1748" scaleX="40.3486">
+            <variant:GradientEntry ratio="0" color="#F36E21" flm:midpoint="0.803680953979492"/>
+            <variant:GradientEntry ratio="1" color="#EE3435"/>
+          </variant:LinearGradient>
+        </variant:fill>
+      </variant:Ellipse>
+    </mngo:VariantContent>
+    <mngo:VariantContent fpdNS="http://ns.adobe.com/flame/2008/apd" fpdPRE="variant" flm:hashcode="71CC0259DB4FE85940835FEAF65BFB6C" flm:original="2" d:ref="#4">
+      <variant:Path x="2.01416" y="2.01416" winding="nonZero" ai:objID="2dd6f960" ai:seqID="5" data="M18.1606 36.3203C8.14648 36.3203 0 28.1738 0 18.1597 0 8.146 8.14648 0 18.1606 0 28.1743 0 36.3208 8.146 36.3208 18.1597 36.3208 28.1738 28.1743 36.3203 18.1606 36.3203L18.1606 36.3203Z">
+        <variant:fill>
+          <variant:RadialGradient x="15.3818" y="27.7793" scaleX="49.8122" scaleY="49.8122">
+            <variant:GradientEntry ratio="0" color="#F36B21"/>
+            <variant:GradientEntry ratio="0.521472" color="#EC2227" flm:midpoint="0.57391300201416"/>
+            <variant:GradientEntry ratio="1" color="#C02126" flm:midpoint="0.510203971862793"/>
+          </variant:RadialGradient>
+        </variant:fill>
+      </variant:Path>
+    </mngo:VariantContent>
+    <ai:PrivateElement d:ref="#1">
+      <ai:SaveOptions>
+        <ai:Dict data="B includeXMP 0 I expandBlendsOption 5 I rasterizeResolution 72 B includeObjectOutsideArtboard 0 I preserveTextPolicy 4 B includeSymbol 0 I versionKey 2 B aiEditCap 1 B downsampleLinkedImages 0 B writeImages 1 I preserveGradientPolicy 4 I preserveFilterPolicy 3 "/>
+      </ai:SaveOptions>
+      <ai:DocData base="reject.assets/images" rulerCanvasDiffH="24.5" rulerCanvasDiffV="24.5">
+        <ai:DocRasterSettings>
+          <ai:Dict data="I colr 5 B alis 0 I dpi. 300 B spot 1 R padd 36 B mask 0 "/>
+        </ai:DocRasterSettings>
+      </ai:DocData>
+      <ai:AutoGenImageList>
+        <ai:Dict/>
+      </ai:AutoGenImageList>
+    </ai:PrivateElement>
+    <ai:PrivateElement flm:hashcode="7DA058F96435BDA4EEBA1E4BCEA4B114" d:ref="#2">
+      <ai:LayerOptions color="5 79.31 257 128.502"/>
+    </ai:PrivateElement>
+  </Private>
+</Graphic>

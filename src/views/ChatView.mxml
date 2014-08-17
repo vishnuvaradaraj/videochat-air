@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer width="100%" height="100%" borderColor="#CCCCCC" backgroundAlpha="0" 
+				   xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" creationComplete="bordercontainer1_creationCompleteHandler(event)"
+				   xmlns:renderers="renderers.*" xmlns:components="components.*" xmlns:views="views.*">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			import assets.greenorb;
+			import assets.phone;
+			import assets.shutdown;
+			import assets.stop;
+			import assets.vintagetv;
+			
+			import components.RoundedImage;
+			
+			import events.ChatEvent;
+			import events.StatusInfoEvent;
+			import events.UserEvent;
+			import events.VideoChangeEvent;
+			
+			import flash.events.TimerEvent;
+			import flash.utils.Timer;
+			
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import p2p.CallManager;
+			import p2p.LocalFileLoader;
+			import p2p.P2PFileShare;
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.UserObject;
+			import p2p.VideoSession;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			[Bindable]
+			private var chatMessages:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			public var isPrivate :Boolean = true;
+			
+			protected var userObject:UserObject = null;
+			
+			private function onChatMessage(event:ChatEvent):void
+			{
+				trace("Displaying chat message: " + event.data.message);	
+				
+				var callerId:String = event.data.id;
+				var user : UserObject = null;
+				
+				if (event.data.isPrivate && this.isPrivate && ((callerId == P2PSession.myUser.id) || (event.data.peerId == P2PSession.myUser.id)) )
+				{
+					if (this.userObject && (callerId == this.userObject.id))
+					{
+						user = userObject;
+					}
+					else if (callerId == P2PSession.myUser.id)
+					{
+						user = this.globals.currentUser;
+					}					
+				}
+				else if (!this.isPrivate && !event.data.isPrivate && event.data.sender && event.data.sender.nick)
+				{
+					user = new UserObject(event.data.sender);
+					Globals.getInstance().userCache.saveUser(user);
+				}
+				
+				if (user)
+				{
+					var chat : Object = new Object();
+					chat.message = event.data.message;
+					chat.nick = user.nick;
+					chat.photo = user.photo;
+					chat.state = "you";
+					if (callerId == P2PSession.myUser.id)
+						chat.state = "me";
+					
+					this.chatMessages.addItemAt(chat, 0);
+					if (this.chatMessages.length > this.globals.MAX_CHAT)
+					{
+						for(var i:int=0; i<5; i++)
+						{
+							if (this.chatMessages.length>0)
+							{
+								this.chatMessages.removeItemAt(this.chatMessages.length-1);
+							}
+						}
+					}
+				}
+			}
+
+			protected function bordercontainer1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if (this.globals.remoteUser)
+				{
+					this.userObject = this.globals.remoteUser.data;
+				}
+				
+				if (globals.p2pSession.chatGroup)
+				{
+					globals.p2pSession.chatGroup.addEventListener(ChatEvent.NEW_MESSAGE, this.onChatMessage);
+				}
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:VGroup  top="0" width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10" >
+		
+		<views:InCallsPage width="100%" currentState="mini" />
+
+		<views:ChatSender isPrivate="{this.isPrivate}"  />
+
+		<s:Scroller>
+			
+			
+			<s:DataGroup width="100%" height="440" dataProvider="{this.chatMessages}" >
+				
+				<s:layout>
+					<s:VerticalLayout gap="10" />
+				</s:layout>
+				
+				<s:itemRenderer>
+					<fx:Component>
+						<s:ItemRenderer currentState="{data.state}">
+							
+							<s:states>
+								<s:State name="me"/>
+								<s:State name="you"/>
+							</s:states>
+							
+							<s:VGroup width="100%">
+								
+								<s:HGroup width="100%" includeIn="me">
+									<s:SkinnableContainer>
+										<s:Image source="{data.photo}" width="54" height="54" />
+										<s:SkinnableContainer backgroundColor="#AEAEAE" backgroundAlpha=".5" top="54" right="0" width="100%">
+											<s:Label text="{data.nick}" fontSize="14" top="2" bottom="2" left="2" right="20"/>								
+										</s:SkinnableContainer>
+									</s:SkinnableContainer>
+									<s:Group width="100%" >
+										<components:BlueChat width="80%" height="100%"/>
+										<s:Label text="{data.message}" minWidth="200" width="80%" paddingLeft="20" paddingRight="20" paddingBottom="20" paddingTop="20"/>
+									</s:Group>							
+								</s:HGroup>
+								
+								<s:HGroup width="100%" includeIn="you">
+									<s:Group width="100%" >
+										<components:OrangeChat  width="80%" height="100%"/>
+										<s:Label text="{data.message}" minWidth="200"  width="80%" paddingLeft="20" paddingRight="20" paddingBottom="20" paddingTop="30" />
+									</s:Group>							
+									<s:SkinnableContainer>
+										<s:Image source="{data.photo}" width="54" height="54" />
+										<s:SkinnableContainer backgroundColor="#AEAEAE" backgroundAlpha=".5" top="54" right="0" width="100%">
+											<s:Label text="{data.nick}" fontSize="14" top="2" bottom="2" left="2" right="20"/>
+										</s:SkinnableContainer>
+									</s:SkinnableContainer>
+									
+								</s:HGroup>
+								
+							</s:VGroup>
+							
+						</s:ItemRenderer>
+					</fx:Component>
+				</s:itemRenderer>
+				
+			</s:DataGroup>
+			
+		</s:Scroller>
+				
+	</s:VGroup>
+</s:BorderContainer>

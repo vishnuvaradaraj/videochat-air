@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+InformationBox Component
+
+Copyright (c) 2010 by DigitalRetro Productions, Inc.  All Rights Reserved.
+
+You are free to use this in your commercial or non-commercial code, but please
+keep this notice in-place.
+
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:components="spark.components.*"
+		 width="420">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.managers.PopUpManager;
+			
+			public static const IC_ALERT:String	= "assets/ic_alert.png";
+			public static const IC_INFO:String 	= "assets/ic_info.png";
+			
+			[Bindable]
+			public var icon:String		= IC_INFO;
+			
+			[Bindable]
+			public var title:String 	= "Information";
+			
+			[Bindable]
+			public var message:String	= "Default Message";
+			
+			public static function show(parent:DisplayObject, icon:String, title:String, message:String):void
+			{
+				var infoBox:InformationBox = new InformationBox();
+				
+				infoBox.icon	= icon;
+				infoBox.title	= title;
+				infoBox.message	= message;
+				
+				PopUpManager.addPopUp(infoBox, parent, true);
+				PopUpManager.centerPopUp(infoBox);
+			}
+			
+			protected function okayBtn_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer backgroundColor="0x333333" width="100%" borderColor="0xffffff" borderWeight="4" cornerRadius="10">
+		<s:VGroup width="100%">
+			<s:HGroup width="100%" gap="15" paddingBottom="10" paddingLeft="15" paddingRight="15" paddingTop="15">
+				<s:Image source="{this.icon}"/>
+				<s:Label width="100%" fontSize="32" paddingTop="12" text="{this.title}" color="#FFFFFF"/>
+			</s:HGroup>
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="0x5b5b5b" weight="2"/>
+				</s:stroke>
+			</s:Line>
+			<s:Label maxDisplayedLines="6" maxHeight="300" width="100%" fontSize="24" fontWeight="normal" paddingTop="12" paddingBottom="12" paddingLeft="15" paddingRight="15" text="{this.message}" color="#FFFFFF"/>
+			<s:Group width="100%" height="70">
+				<s:Image source="assets/button_gloss.png"/>
+				<s:HGroup bottom="0" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" paddingLeft="10" paddingRight="10">
+					<s:Button id="okayBtn" width="100%" height="50" label="OK" fontSize="18" chromeColor="#ECECEC"
+							  click="okayBtn_clickHandler(event)" color="#000000" 
+							  fontFamily="_sans" fontWeight="normal"/>
+				</s:HGroup>
+			</s:Group>
+		</s:VGroup>
+	</s:BorderContainer>
+	
+</s:Group>

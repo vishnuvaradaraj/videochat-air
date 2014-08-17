@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:mx="library://ns.adobe.com/flex/halo" 
+		xmlns:mx1="library://ns.adobe.com/flex/mx"
+		xmlns:views="views.*" xmlns:components="components.*" creationComplete="view1_creationCompleteHandler(event)" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="VideoPage" xmlns:assets="assets.*"  >
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			import assets.greenorb;
+			import assets.phone;
+			import assets.shutdown;
+			import assets.stop;
+			import assets.vintagetv;
+			
+			import components.InformationBox;
+			import components.RoundedImage;
+			
+			import events.ChatEvent;
+			import events.StatusInfoEvent;
+			import events.UserEvent;
+			import events.UserStatusEvent;
+			import events.VideoChangeEvent;
+			
+			import flash.events.TimerEvent;
+			import flash.utils.Timer;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import p2p.CallManager;
+			import p2p.LocalFileLoader;
+			import p2p.P2PFileShare;
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.VideoSession;
+			
+			import spark.events.ViewNavigatorEvent;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+
+			[Bindable]
+			private var p2pUser : P2PUser;
+			private var action :String;
+
+			private var fileLoader:LocalFileLoader;
+			[Bindable]
+			private var fileShare:P2PFileShare;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+						
+			[Bindable]
+			private var chatOnly:Boolean = false;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (value)
+				{
+					if (value.hasOwnProperty("action"))
+					{
+						this.action = value.action;
+					}
+			
+					if (value.hasOwnProperty("chatOnly"))
+					{
+						this.chatOnly = value.chatOnly;
+					}
+					
+					if (value.user is P2PUser)
+					{
+						this.p2pUser = value.user as P2PUser;
+						this.title = this.p2pUser.nick;
+					}
+					else
+					{
+						this.p2pUser = null;
+						this.title = "Not connected";
+					}		
+				}
+			}
+			
+			private function initFileSharing(conn:NetConnection, group:NetGroup):void
+			{
+				
+				fileLoader = new LocalFileLoader();
+				fileLoader.addEventListener(StatusEvent.STATUS,onStatus);
+				fileLoader.addEventListener(Event.COMPLETE,fileLoaderComplete);
+				
+				fileShare = new P2PFileShare();
+				fileShare.addEventListener(StatusEvent.STATUS,onStatus);
+				fileShare.addEventListener(Event.COMPLETE,fileShareComplete);
+				
+				fileShare.init(conn, group);				
+			}
+			
+			private function onStatus(event:StatusEvent):void
+			{
+				writeText(event.level);				
+			}
+						
+			private function fileLoaderComplete(event:Event):void
+			{
+				writeText("fileLoaderComplete");
+				
+				fileShare.startSharing(fileLoader.p2pSharedObject);				
+			}
+			
+			private function writeText(txt:String):void
+			{
+				trace(txt+"\n");
+			}
+			
+			private function fileShareComplete(event:Event):void
+			{
+				writeText("fileShareComplete");
+				
+				//fileShare.p2pSharedObject.data;
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				initFileSharing(P2PSession.connection, globals.p2pSession.group);
+			}
+			
+			public function back():void
+			{
+				trace("back clicked.");
+				pv.endCall();
+				
+			}
+
+			protected function onDisconnect(event:UserEvent):void
+			{
+				trace("disconnected p2p session in video page...");
+				
+				//pv.endCall(); - will cause errors.
+				
+				InformationBox.show(this, InformationBox.IC_ALERT, "Error", "User disconnected.");
+				navigator.popView();
+			}
+			
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				Globals.LOG.info("VIDEO PAGE - activate");
+				
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.messages = true;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				this.updateState();
+				this.addEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+				
+				this.globals.p2pSession.addEventListener(UserStatusEvent.DISCONNECTED, this.onDisconnect);
+
+			}
+			
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				Globals.LOG.info("VIDEO PAGE - deactivate");
+				this.globals.actionBarItems = this.actionBarItems;
+				
+				this.removeEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+				this.globals.p2pSession.removeEventListener(UserStatusEvent.DISCONNECTED, this.onDisconnect);
+			}
+
+			protected function updateState():void
+			{
+				
+				var width:int = this.navigator.width;
+				var height:int = this.navigator.height;
+				
+				if (width < height)
+					this.currentState = "landscape";
+				else
+					this.currentState = "portrait";
+				
+				Globals.LOG.info("Updating state:(" + this.currentState + ") width=" + width + ", height=" + height);		
+				
+				if ((width>height && width <= 900) || width<500)
+				{
+					this.pv.width = 450;
+					this.pv.showTv = false;
+				}
+			}
+
+			protected function view1_stageHandler(event:Event):void
+			{
+				this.updateState();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:VerticalLayout id="verticalLayout" />
+		<s:HorizontalLayout id="horizontalLayout" />
+
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="landscape" />
+		<s:State name="portrait"/>
+	</s:states>
+	
+	<s:Group	
+		layout.portrait="{horizontalLayout}"
+		layout.landscape="{verticalLayout}"
+		width="100%"
+		height="100%"
+		>
+
+			<views:VideoView id="pv" width.landscape="100%" height.portrait="100%" width.portrait="600" height.landscape="385" p2pUser="{this.p2pUser}" sendVideo="{!this.chatOnly}"  navigator="{navigator}"/>
+			<views:ChatView width="100%"  height="100%" isPrivate="true" />
+	</s:Group>
+		
+</s:View>

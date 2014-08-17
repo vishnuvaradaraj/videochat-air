@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"  width="100%"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Settings" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)" xmlns:parabay="services.parabay.*">
+	<fx:Script>
+		<![CDATA[
+			import components.InformationBox;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.ViewNavigatorEvent;
+			
+			protected var sqlConnection:SQLConnection;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+			
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+			}
+
+
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+			}
+
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				try
+				{
+					sqlConnection = new SQLConnection();
+					sqlConnection.open(File.applicationStorageDirectory.resolvePath("cache.db"));
+					
+					var stmt:SQLStatement = new SQLStatement();
+					stmt.sqlConnection = sqlConnection;
+					
+					stmt.text = "DELETE FROM userCache";
+					stmt.execute();
+					
+				}
+				catch (error:SQLError)
+				{
+					trace("error deleting data");
+				}
+			}
+
+
+			protected function fixupResult_resultHandler(event:ResultEvent):void
+			{
+				InformationBox.show(this, InformationBox.IC_INFO, "Info", "Successfully fixed data.");
+			}
+
+
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				fixupResult.token = this.parabayService.fixupData(this.globals.token);
+			}
+
+
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				var user:Object = new Object();
+				user.name = globals.currentUser.nick;
+				user.age = globals.currentUser.age;
+				user.gender = globals.currentUser.gender;
+				user.description = globals.currentUser.description;
+				user.location = globals.currentUser.location;
+				
+				globals.registerUserCache = user;
+				globals.lastUpload = globals.currentUser.photo;
+				
+				navigator.pushView(views.ProfilePage, user);
+			}
+
+
+			protected function button4_clickHandler(event:MouseEvent):void
+			{
+				navigator.pushView(views.FBLoginPage);
+			}
+
+			protected function button5_clickHandler(event:MouseEvent):void
+			{
+				this.globals.friendsList.getData(false);
+			}
+			
+			protected function check1_clickHandler(event:MouseEvent):void
+			{
+				this.globals.isInvisible = !this.globals.isInvisible;
+			}
+			
+
+			protected function checkbox1_clickHandler(event:MouseEvent):void
+			{
+				this.globals.hidePublic = !this.globals.hidePublic;
+			}
+
+			private var browseFile:File = new File();
+			
+			protected function button6_clickHandler(event:MouseEvent):void
+			{
+				var fileFilters:Array = new Array();
+				fileFilters.push( new FileFilter( 'FLV', '*.flv' ) );
+				fileFilters.push( new FileFilter( 'MOV', '*.mov' ) );
+				fileFilters.push( new FileFilter( 'MP4', '*.mp4' ) );
+				fileFilters.push( new FileFilter( 'AVI', '*.avi' ) );
+				fileFilters.push( new FileFilter( 'MPG', '*.mpg' ) );
+				
+				browseFile.browseForOpen("Open File", fileFilters);
+				browseFile.addEventListener(Event.SELECT, selectedFileHandler);
+			}
+
+			protected function selectedFileHandler(event:Event):void
+			{
+				Globals.LOG.info(browseFile.nativePath);
+				this.globals.localVideoFile = browseFile.nativePath;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<parabay:Parabay id="parabayService" />
+		<s:CallResponder id="fixupResult" result="fixupResult_resultHandler(event)" />
+	</fx:Declarations>
+	
+	<s:VGroup width="{this.navigator.width}" paddingLeft="20" paddingRight="20" paddingTop="20" gap="20">
+	
+		<s:HGroup width="{this.navigator.width}">
+			<s:Label text="User:" paddingTop="10" />
+			<s:TextInput text="{this.globals.currentUser.nick}" enabled="false" width="50%" />
+		</s:HGroup>
+		
+		<s:HGroup width="{this.navigator.width}" includeInLayout="false" visible="false">
+			<s:Label text="Video:" paddingTop="10" />
+			<s:TextInput text="{this.globals.localVideoFile}" width="50%" />
+			<s:Button label="Select" click="button6_clickHandler(event)" />
+		</s:HGroup>
+		
+		<s:Button label="Update my profile" click="button3_clickHandler(event)" width="98%"/>
+		<s:Button label="Clear local data" click="button1_clickHandler(event)"  width="98%"/>
+		<s:Button label="Refresh data" click="button5_clickHandler(event)"  width="98%"/>
+
+		<!-- <s:Button label="Login to Facebook" click="button4_clickHandler(event)" width="90%"/> -->
+		<s:Button label="Fixup data" click="button2_clickHandler(event)" width="98%" includeInLayout="{this.globals.currentUser.nick == 'support'}"/>
+		<s:CheckBox label="Appear Offline" width="98%" click="check1_clickHandler(event)" selected="{this.globals.isInvisible}" />
+		<s:CheckBox label="Hide Public Messages" width="98%" click="checkbox1_clickHandler(event)" selected="{this.globals.hidePublic}" />
+	</s:VGroup>
+	
+</s:View>

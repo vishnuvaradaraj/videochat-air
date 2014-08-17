@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ViewNavigatorApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 firstView="views.LoginPage" 
+					 xmlns:pbay="services.parabay.*" 
+					 xmlns:maps="com.google.maps.*" activate="mobileapplication1_activateHandler(event)"
+					 initialize="mobileapplication1_initializeHandler(event)"  
+					 persistNavigatorState="false" xmlns:assets="assets.*">
+
+
+	<!-- 
+	The MobileApplication typically doesn't contain much content; most content lives in
+	the individual View components. However, you can add content to the ActionBar here
+	that will show up in every view. In this case, we want a Refresh button in every view
+	that calls the refresh() method defined on each view. 
+	-->
+	<fx:Style source="assets/styles.css" />
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.messages;
+			import assets.more;
+			import assets.settings;
+			
+			import com.adobe.utils.DateUtil;
+			
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			
+			import valueObjects.UpdatePeerResult;
+			
+			import views.ChatRoomPage;
+			import views.SettingsPage;
+			
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if (navigator.length > 1)
+				{
+					if ("back" in navigator.activeView)
+					{
+						Object(navigator.activeView).back();
+					}
+					
+					navigator.popView();
+				}
+			}
+
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				this.globals.p2pSession.disconnect();
+				this.globals.p2pUsersList.removeAll();
+				logoutUserResult.token = parabayService.logoutUser(this.globals.token);	
+				
+				this.globals.token = null;
+				navigator.popAll();
+				navigator.pushView(views.LoginPage);
+
+			}
+
+			protected function onP2PSessionConnect(event:Event):void
+			{
+				trace("session connected");
+				updatePeerId.token = this.parabayService.updatePeerId(this.globals.token, P2PSession.myUser.id);
+			}
+
+			protected function onP2PSessionDisconnect(event:Event):void
+			{
+				trace("session disconnected");
+				//this.parabayService.updatePeerId(this.globals.token, "");
+			}
+						
+			protected function mobileapplication1_initializeHandler(event:FlexEvent):void
+			{
+				trace( "Flash Player Version: " + Capabilities.version );
+				trace( "Is Flash Player a Debugger? " + Capabilities.isDebugger );
+				trace( "Resolution: " + Capabilities.screenResolutionX + "x" + Capabilities.screenResolutionY );
+									
+				this.globals.mobileApplication = this;
+				this.globals.p2pSession.addEventListener(Event.CONNECT, onP2PSessionConnect,false,0,true);	
+				this.globals.p2pSession.addEventListener(Event.CLOSE, onP2PSessionDisconnect,false,0,true);				
+
+				this.updateStats('app_init');
+			}
+
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				navigator.pushView(views.ChatRoomPage);
+			}
+
+			protected function buttonrefresh_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				if ("refresh" in navigator.activeView)
+				{
+					Object(navigator.activeView).refresh();
+				}
+			}
+
+			protected function button4_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				var p2pUser:P2PUser = new P2PUser(this.globals.currentUser, this.globals.callManager);
+				navigator.pushView(views.MessagesPage, p2pUser);
+			}
+
+
+			protected function searchBtn_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				if ("search" in navigator.activeView)
+				{
+					Object(navigator.activeView).search();
+				}
+			}
+
+
+			protected function moreBtn_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				if ("more" in navigator.activeView)
+				{
+					Object(navigator.activeView).more();
+				}
+			}
+
+
+			protected function button5_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				navigator.popToFirstView();
+			}
+
+
+			protected function updatePeerId_resultHandler(event:ResultEvent):void
+			{
+				var res:UpdatePeerResult = UpdatePeerResult(event.result);
+				this.globals.currentUser.approved = (res.approved ? 1 : 0);
+				this.globals.userCache.saveUser(this.globals.currentUser);
+				this.globals.serverSettings = res;
+			}
+
+
+			protected function settingsBtn_clickHandler(event:MouseEvent):void
+			{
+				if ("back" in navigator.activeView)
+				{
+					Object(navigator.activeView).back();
+				}
+				
+				navigator.pushView(views.SettingsPage);
+			}
+
+
+			protected function updateStats(msg:String):void
+			{
+				var o:Object = new Object();
+				o.action = Globals.APP_FOCUS_INIT;
+				o.action_time = DateUtil.toW3CDTF(new Date());
+				o.is_ok = true;
+				o.body = msg;
+				this.globals.appendStats(o);	
+			}
+			
+			protected function mobileapplication1_activateHandler(event:Event):void
+			{
+				this.updateStats('app_focus');
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:CallResponder id="logoutUserResult" />
+		<s:CallResponder id="updatePeerId" result="updatePeerId_resultHandler(event)"  />
+		<pbay:Parabay id="parabayService"/>
+	</fx:Declarations>	
+	
+	<s:navigationContent>
+		<s:Button icon="@Embed('assets/home.png')" click="button5_clickHandler(event)"
+				  visible="{this.globals.actionBarItems.home}" includeInLayout="{this.globals.actionBarItems.home}" />
+	</s:navigationContent>
+
+	<s:actionContent>
+
+		<s:Button id="moreBtn" icon="{assets.more}" click="moreBtn_clickHandler(event)" toolTip="Fetch more users"
+				  visible="false" includeInLayout="false" />	
+		<s:Button id="searchBtn" icon="@Embed('assets/search.png')"  click="searchBtn_clickHandler(event)" toolTip="Advanced search options for users"
+				  visible="{this.globals.actionBarItems.search}" includeInLayout="{this.globals.actionBarItems.search}" />	
+		<s:Button click="button3_clickHandler(event)" icon="@Embed(source='assets/sms.png')" toolTip="Global Chat"
+				  visible="{this.globals.actionBarItems.chat}" includeInLayout="{this.globals.actionBarItems.chat}" />
+		<s:Button click="buttonrefresh_clickHandler(event)" icon="@Embed(source='assets/refresh48x48.png')" toolTip="Refresh all users"
+				  visible="{this.globals.actionBarItems.refresh}" includeInLayout="{this.globals.actionBarItems.refresh}" />
+		<s:Button click="button1_clickHandler(event)" icon="@Embed(source='assets/back48x48.png')"  toolTip="Go back"
+				  visible="{this.globals.actionBarItems.back}" includeInLayout="{this.globals.actionBarItems.back}" />
+		<s:Button id="settingsBtn" icon="{assets.settings}" click="settingsBtn_clickHandler(event)" toolTip="Settings"
+				  visible="{this.globals.actionBarItems.settings}" includeInLayout="{this.globals.actionBarItems.settings}" />	
+		<s:Button click="button4_clickHandler(event)" icon="{assets.messages}" toolTip="Check your messages"
+				  visible="{this.globals.actionBarItems.messages}" includeInLayout="{this.globals.actionBarItems.messages}" />
+		<s:Button id="logoutButton" click="button2_clickHandler(event)" toolTip="Logout from SFH" 
+				  visible="{this.globals.token}" includeInLayout="{this.globals.token}"
+				  icon="@Embed(source='assets/logout.png')" />
+	</s:actionContent>
+	
+	<fx:Declarations>
+		<s:TraceTarget filters="Globals"  fieldSeparator=" " includeCategory="true" includeLevel="true" includeTime="true"/>		
+	</fx:Declarations>	
+	
+</s:ViewNavigatorApplication>

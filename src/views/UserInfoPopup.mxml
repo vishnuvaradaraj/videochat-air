@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" >
+	<fx:Script>
+		<![CDATA[
+			import assets.yellowbutton;
+			
+			import model.Globals;
+			
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				host.displayPopUp = false;
+				this.globals.remoteUser = this.data;	
+				this.globals.remoteUser.handleUserRequest();
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				this.globals.callManager.rejectIncomingCall(this.data.peerId);
+				host.displayPopUp = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import spark.components.PopUpAnchor;
+			import p2p.P2PUser;
+			import assets.greenbutton;
+			
+			[Bindable]
+			public var data :P2PUser;
+			
+			[Bindable]
+			public var host :PopUpAnchor;
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer backgroundAlpha="0.2" backgroundColor="black" borderColor="white"  cornerRadius="15" >
+		
+		<s:VGroup paddingBottom="6" paddingTop="6" paddingLeft="6" paddingRight="6">
+			
+			
+			<s:HGroup >
+				<s:Label text="Incoming call from: " />
+				<s:Label text="{data.nick}" />
+			</s:HGroup>
+			
+			<s:HGroup>
+				<s:CheckBox id="sendVideo" label="Send Video?" selected="true" />
+			</s:HGroup>
+			
+			<s:HGroup>
+				<s:Button label="Accept" click="button1_clickHandler(event)" />
+				<s:Button label="Ignore" click="button2_clickHandler(event)"/>				
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:BorderContainer>
+	
+</s:SkinnableContainer>

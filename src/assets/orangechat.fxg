@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Graphic version="2.0" viewHeight="70" viewWidth="58" ai:appVersion="15.0.0.399" ATE:version="1.0.0" flm:version="1.0.0" d:id="1" d:using="" xmlns="http://ns.adobe.com/fxg/2008" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+  <Library/>
+  <Group ai:artboardActive="1" ai:artboardIndex="0" ai:seqID="1" d:layerType="page" d:pageHeight="70" d:pageWidth="58" d:type="layer" d:userLabel="Artboard 1">
+    <Group ai:objID="2c952b90" ai:seqID="2" d:id="2" d:type="layer" d:userLabel="Layer 1">
+      <Group x="0.86377" y="0.1875" ai:objID="2e4e3340" ai:seqID="3">
+        <Path winding="nonZero" ai:objID="2e4e2720" ai:seqID="4" data="M10.0088 69.877C4.49023 69.877 0 65.3887 0 59.8711L0 34.6484C0 29.1328 4.49023 24.6445 10.0088 24.6445L37.2124 24.6445 57.0747 0 52.8237 27.0527C55.0317 28.9473 56.3267 31.7129 56.3267 34.6484L56.3267 59.8711C56.3267 65.3887 51.8364 69.877 46.3198
+ 69.877L10.0088 69.877Z">
+          <fill>
+            <SolidColor color="#FFFFFF"/>
+          </fill>
+        </Path>
+        <Path x="1.67773" y="5.11426" winding="nonZero" ai:objID="2e4e2090" ai:seqID="5" data="M8.33105 63.0859C3.73828 63.0859 0 59.3506 0 54.7568L0 29.5342C0 24.9443 3.73828 21.208 8.33105 21.208L36.3354 21.208 53.3989 0 49.313 22.6475C51.5317 24.1582 52.9712 26.7041 52.9712 29.5342L52.9712 54.7568C52.9712 59.3506 49.2358 63.0859 44.6421
+ 63.0859L8.33105 63.0859Z">
+          <fill>
+            <RadialGradient x="27.2061" y="66.5029" scaleX="58.4432" scaleY="58.4432">
+              <GradientEntry ratio="0" color="#FFD01F"/>
+              <GradientEntry ratio="1" color="#F05223"/>
+            </RadialGradient>
+          </fill>
+        </Path>
+        <Path x="1.67773" y="5.11426" winding="nonZero" ai:objID="2e412740" ai:seqID="6" data="M36.3354 21.208 8.33105 21.208C3.73828 21.208 0 24.9443 0 29.5342L0 34.0908C7.41113 39.2119 17.5015 42.3701 28.6294 42.3701 37.7378 42.3701 46.1509 40.2549 52.9712 36.6768L52.9712 29.5342C52.9712 26.7041 51.5317 24.1582 49.313 22.6475L53.3989
+ 0 36.3354 21.208Z">
+          <fill>
+            <LinearGradient x="26.6997" y="42.3701" scaleX="42.3696" rotation="270">
+              <GradientEntry ratio="0" color="#F26A21"/>
+              <GradientEntry ratio="1" color="#FED379"/>
+            </LinearGradient>
+          </fill>
+        </Path>
+      </Group>
+    </Group>
+  </Group>
+  <Private>
+      <ai:PrivateElement d:ref="#1">
+        <ai:SaveOptions>
+          <ai:Dict data="B includeXMP 0 B writeImages 1 I preserveTextPolicy 4 I preserveFilterPolicy 3 I preserveGradientPolicy 4 I expandBlendsOption 5 I rasterizeResolution 72 B downsampleLinkedImages 0 B includeObjectOutsideArtboard 0 B aiEditCap 1 B includeSymbol 0 I versionKey 2 "/>
+        </ai:SaveOptions>
+        <ai:DocData base="orangechat.assets/images" rulerCanvasDiffH="29.5" rulerCanvasDiffV="35.5">
+          <ai:DocRasterSettings>
+            <ai:Dict data="I dpi. 300 R padd 36 I colr 5 B spot 1 B mask 0 B alis 0 "/>
+          </ai:DocRasterSettings>
+        </ai:DocData>
+        <ai:AutoGenImageList>
+          <ai:Dict/>
+        </ai:AutoGenImageList>
+      </ai:PrivateElement>
+      <ai:PrivateElement flm:hashcode="DB83CCF2B3D6B615A0DE3857EC36C4DB" d:ref="#2">
+        <ai:LayerOptions color="5 79.31 257 128.502"/>
+      </ai:PrivateElement>
+    </Private>
+  </Graphic>

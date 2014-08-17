@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnableContainer xmlns:fx="http://ns.adobe.com/mxml/2009" creationComplete="bordercontainer1_creationCompleteHandler(event)"
+					  xmlns:s="library://ns.adobe.com/flex/spark" width="100%" height="100%" backgroundColor="white" backgroundAlpha="0.5"  xmlns:components="components.*" xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.utils.DateUtil;
+			
+			import components.InformationBox;
+			
+			import events.UserStatusEvent;
+			
+			import model.Globals;
+			
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			
+			import p2p.P2PUser;
+			
+			import spark.components.View;
+			import spark.components.ViewNavigator;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			[Bindable]
+			public var navigator:ViewNavigator;
+			
+			[Bindable]
+			public var params:Object;
+			
+			private var timer:Timer;
+			
+			private var parentView:View;
+			
+			private var cancelled:Boolean = false;
+			
+			public function show(_navigator:ViewNavigator, _params:Object):void
+			{
+				this.cancelled = false;
+				this.navigator = _navigator;
+				this.params = _params;
+				
+				this.parentView = this.globals.mobileApplication.navigator.activeView;
+				if (this.parentView)
+				{
+					this.parentView.addElement(this);
+				}
+
+			}
+			
+			public function cancel():void
+			{
+				if (!cancelled)
+				{
+					this.cancelled = true;
+					
+					this.unwatch();
+					if (this.parentView && this.parentView.isActive)
+					{
+						for(var i:int = 0; i<this.parentView.numElements; i++)
+						{
+							var elem:IVisualElement = this.parentView.getElementAt(i);
+							if (elem == this)
+							{
+								this.parentView.removeElementAt(i);
+							}
+						}
+					}
+					
+					this.globals.callManager.resetCallState((params.user as P2PUser).id);
+				}
+			}
+			
+			protected function updateStats(success:Boolean):void
+			{				
+				var o:Object = new Object();
+				o.dest = (params.user as P2PUser).nick;
+				o.action = Globals.CLICK_USER_CHAT;
+				o.action_time = DateUtil.toW3CDTF(new Date());
+				o.is_ok = success;
+				o.body = 'call_user';
+				this.globals.appendStats(o);	
+			}
+			
+			protected function onAccepted(event:UserStatusEvent):void
+			{
+				if (params.user.id == event.userStatusInfo.user.id)
+				{
+					this.updateStats(true);
+					//this.cancel();
+					
+					if (navigator)
+					{
+						this.globals.remoteUser = params.user;	
+						navigator.pushView(views.VideoPage, params);
+					}
+				}
+			}
+	
+			protected function onRejected(event:UserStatusEvent):void
+			{
+				if (params.user.id == event.userStatusInfo.user.id)
+				{
+					if (!this.cancelled)
+					{
+						InformationBox.show(this, InformationBox.IC_ALERT, "Error", "User is busy.");
+					}
+					
+					this.cancel();
+				}
+			}
+			
+			protected function bordercontainer1_creationCompleteHandler(event:FlexEvent):void
+			{				
+				globals.callManager.addEventListener(UserStatusEvent.ACCEPTED, this.onAccepted);
+				globals.callManager.addEventListener(UserStatusEvent.REJECTED, this.onRejected);
+				
+				if (params.user) 
+				{
+					var p2pUser:P2PUser = params.user as P2PUser;
+					globals.p2pUsers[p2pUser.id] = p2pUser;
+					
+					if (params.user.callUser())
+					{
+						watch();
+					}
+					else
+					{ 
+						this.updateStats(false);
+						this.cancel();
+						InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Failed to contact user\nYou could still post a message\nfor the user.");
+					}
+				}
+				
+			}
+			
+
+			protected function bordercontainer2_clickHandler(event:MouseEvent):void
+			{
+				this.cancel();
+			}
+
+			public function watch():void
+			{
+				
+				if(timer && timer.running)
+				{
+					return;
+				}
+				
+				if(!timer)
+				{
+					timer = new Timer(60000);
+					timer.addEventListener(TimerEvent.TIMER, onTimerEvent, false, 0, true);
+				}
+				
+				timer.start();
+			}
+			
+			public function unwatch():void
+			{
+				if(!timer)
+				{
+					return;
+				}
+				
+				timer.stop();
+				timer.removeEventListener(TimerEvent.TIMER, onTimerEvent);
+				timer = null;
+			}
+			
+			private function onTimerEvent(e:TimerEvent):void
+			{
+				this.updateStats(false);
+				this.cancel();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+	</s:states>
+	
+	<s:VGroup width="100%" height="100%">
+		<mx:Spacer height="20%" />
+		<s:HGroup width="100%" height="100%">
+			<mx:Spacer width="30%"/>
+			<s:BorderContainer backgroundColor="black" backgroundAlpha=".8" cornerRadius="15" click="bordercontainer2_clickHandler(event)" >
+				
+				<s:HGroup horizontalAlign="center" verticalAlign="middle" paddingTop="20" paddingLeft="20" paddingBottom="20" paddingRight="20" >
+					
+					<components:BusyIndicator id="busyIndicator" busy="true"  
+											   width="48" height="48"  />
+					<s:Label text="Contacting user..." color="#FFFFFF" />		
+				</s:HGroup>
+				
+			</s:BorderContainer> 
+		</s:HGroup>
+	</s:VGroup>
+
+
+</s:SkinnableContainer>

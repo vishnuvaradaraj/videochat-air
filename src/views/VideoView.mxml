@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:mx="library://ns.adobe.com/flex/halo" 
+		 xmlns:mx1="library://ns.adobe.com/flex/mx"
+		 top="0" left="0" 
+		 xmlns:views="views.*" xmlns:components="components.*" creationComplete="view1_creationCompleteHandler(event)"
+		 xmlns:s="library://ns.adobe.com/flex/spark" xmlns:assets="assets.*"  >
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			import assets.greenorb;
+			import assets.phone;
+			import assets.shutdown;
+			import assets.stop;
+			import assets.vintagetv;
+			
+			import components.InformationBox;
+			import components.RoundedImage;
+			
+			import events.ChatEvent;
+			import events.StatusInfoEvent;
+			import events.UserEvent;
+			import events.VideoChangeEvent;
+			
+			import flash.events.TimerEvent;
+			import flash.utils.Timer;
+			
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import p2p.CallManager;
+			import p2p.LocalFileLoader;
+			import p2p.P2PFileShare;
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.VideoSession;
+			
+			import spark.components.ViewNavigator;
+			
+			[Bindable]
+			public var p2pUser : P2PUser;
+			
+			private var videoSession :VideoSession;
+			
+			private var localVideo :Video;
+			private var remoteVideo :Video;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			[Bindable]
+			public var navigator:ViewNavigator;
+			
+			[Bindable]
+			public var sendVideo:Boolean = true;
+			
+			[Bindable]
+			public var sendAudio:Boolean = true;
+			
+			[Bindable]
+			private var showMenu:Boolean = false;
+			
+			[Bindable]
+			public var showTv:Boolean = true;
+			
+			protected function handleLocal(event:VideoChangeEvent):void
+			{
+				if (event.type == VideoChangeEvent.START_LOCAL) 
+				{
+					Globals.LOG.info("actually ADDED LOCAL VIDEO");
+					localBanner.visible = true;
+					this.localVideo = event.video;
+					localVideoElement.addChild(this.localVideo);
+				}
+				else
+				{
+					Globals.LOG.info("REMOVED LOCAL VIDEO");
+					if (localVideoElement.numChildren > 0)
+					{
+						Globals.LOG.info("actually REMOVED LOCAL VIDEO");
+						this.localVideo.attachCamera(null);
+						localVideoElement.removeChild(localVideoElement.getChildAt(0));
+					}
+					localBanner.visible = false;
+					this.localVideo = null;
+				}
+			}
+			
+			protected function handleRemote(event:VideoChangeEvent):void
+			{
+				if (event.type == VideoChangeEvent.START_REMOTE) 
+				{
+					Globals.LOG.info("actually ADDED REMOTE VIDEO");
+					this.remoteVideo = event.video;
+					this.remoteVideo.width = 390;
+					this.remoteVideo.height = 290;
+					remoteVideoElement.addChild(this.remoteVideo);
+				}
+				else
+				{
+					Globals.LOG.info("REMOVED REMOTE VIDEO");
+					if (remoteVideoElement.numChildren > 0)
+					{
+						Globals.LOG.info("actually REMOVED REMOTE VIDEO");
+						remoteVideoElement.removeChild(remoteVideoElement.getChildAt(0));
+						this.endCall();
+					}
+					this.remoteVideo = null;
+					
+				}
+			}
+			
+			public function endCall():void
+			{		
+				Globals.LOG.info("END CALL");
+				this.sendVideo = false;
+				if (p2pUser)
+				{
+					p2pUser.endCall(p2pUser.id);
+				}
+				
+				/*
+				if (prompt)
+				{
+					InformationBox.show(this.parent, InformationBox.IC_INFO, "Error", "Call disconnected.");
+					this.navigator.popView();
+				}
+				*/
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.videoSession = globals.videoSession;
+				this.videoSession.addEventListener(VideoChangeEvent.START_LOCAL, handleLocal);
+				this.videoSession.addEventListener(VideoChangeEvent.STOP_LOCAL, handleLocal);
+				this.videoSession.addEventListener(VideoChangeEvent.START_REMOTE, handleRemote);
+				this.videoSession.addEventListener(VideoChangeEvent.STOP_REMOTE, handleRemote);
+				
+				if (this.p2pUser && this.sendVideo)
+				{
+					videoSession.startLocalStream(P2PSession.getConnection());
+					videoSession.startRemoteStream(P2PSession.getConnection(), this.p2pUser.id);
+				}
+			}
+			
+			
+			protected function play1_clickHandler(event:MouseEvent):void
+			{
+				if (this.p2pUser)
+				{
+					videoSession.startLocalStream(P2PSession.getConnection());
+					videoSession.startRemoteStream(P2PSession.getConnection(), this.p2pUser.id);
+				}
+			}
+			
+			
+			protected function stop1_clickHandler(event:MouseEvent):void
+			{
+				this.endCall();
+			}
+			
+			
+			protected function vintagetv1_clickHandler(event:MouseEvent):void
+			{
+				this.showMenu = !this.showMenu;
+			}
+			
+			
+			protected function cameraspin1_clickHandler(event:MouseEvent):void
+			{
+				this.globals.videoSession.switchCamera();
+			}
+			
+			
+			protected function micbutton1_clickHandler(event:MouseEvent):void
+			{
+				this.sendAudio = !this.sendAudio;
+				this.globals.videoSession.switchMic(this.sendAudio);
+			}
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				this.endCall();
+				navigator.pushView(views.ReportUserPage, p2pUser);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+	</s:states>
+	
+	<!-- {p2pUser.nick} -->
+	<s:VGroup id="leftPane" width="100%">
+		<s:Group width="100%" top="0" left="0" click="vintagetv1_clickHandler(event)">
+			
+			<assets:vintagetv id="tv" top="0" left="0" width="575" height="410"   visible="{this.showTv}" includeInLayout="{this.showTv}" /> 
+			<mx1:UIComponent id="remoteVideoElement" left="40" top="45" />
+			
+			<s:Group top="200" left="80" height="100" width="100" >
+				<s:SkinnableContainer id="remoteBanner" backgroundColor="#AEAEAE" backgroundAlpha=".5" top="65" right="0" visible="false">
+					<s:Label text="{p2pUser.nick}" fontSize="14" top="2" bottom="2" left="2" right="20" maxWidth="{leftPane.width*3/20}" maxDisplayedLines="1" />
+					<assets:greenorb verticalCenter="0" right="4" visible="true" width="12" height="12"/>
+				</s:SkinnableContainer>
+				
+				
+				<s:SkinnableContainer id="localBanner" backgroundColor="#EEEEEE" backgroundAlpha=".5" visible="true">
+					<mx1:UIComponent id="localVideoElement" width="88" height="66" top="1" left="1"/>
+					<s:SkinnableContainer  backgroundColor="#AEAEAE" backgroundAlpha=".5" bottom="0" left="0" right="0" visible="true">
+						<s:Label text="{globals.p2pSession.userName}" fontSize="14" top="2" left="2" bottom="2" maxWidth="{leftPane.width*3/20}" maxDisplayedLines="1" />
+						<assets:greenorb verticalCenter="0" right="4" visible="true" width="12" height="12"/>
+					</s:SkinnableContainer>
+				</s:SkinnableContainer>					
+			</s:Group>
+			
+			<s:Group top="300" left="5" width="100%" height="128" includeInLayout="{this.globals.incomingCallFrom == null}" visible="{this.globals.incomingCallFrom == null}" >				
+				<s:Button skinClass="skins.LinkButtonSkin" label="Report abuse" click="button1_clickHandler(event)" />
+			</s:Group>
+			
+		</s:Group>
+
+	</s:VGroup>
+	
+	
+	<s:BorderContainer id="videoMenu" includeInLayout="{this.showMenu}" visible="{this.showMenu}"  top="225" left="85" height="50" backgroundAlpha="0.2" backgroundColor="black">
+		<s:HGroup width="100%">
+			<assets:stop  click="stop1_clickHandler(event)"/>
+			<assets:play  click="play1_clickHandler(event)" />	
+			<assets:cameraspin click="cameraspin1_clickHandler(event)"/>
+			<assets:micbuttonyes click="micbutton1_clickHandler(event)" includeInLayout="{this.sendAudio}" visible="{this.sendAudio}" />
+			<assets:micbutton click="micbutton1_clickHandler(event)" includeInLayout="{!this.sendAudio}" visible="{!this.sendAudio}" />
+		</s:HGroup>
+	</s:BorderContainer>
+
+	
+</s:Group>

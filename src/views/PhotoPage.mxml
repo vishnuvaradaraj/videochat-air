@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" creationComplete="init()"  viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Upload photo" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:assets="assets.*" xmlns:parabay="services.parabay.*" xmlns:views="views.*" xmlns:components="components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.photos;
+			
+			import com.adobe.images.JPGEncoder;
+			
+			import components.InformationBox;
+			import components.Uploader;
+			
+			import flash.events.*;
+			import flash.filesystem.*;
+			
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.UIDUtil;
+			
+			import spark.events.TextOperationEvent;
+			import spark.events.ViewNavigatorEvent;
+			private var file:File; // Used for referencing stored image files
+			private var stream:FileStream; // Used for writing JPEG data to an image file 
+			private var bmd:BitmapData; // Used to store pixels from the Video object
+			private var camera:Camera; // Used to referemce a camera 
+			private var video :Video = new Video();
+			private var path:String;
+			private var uploadUrl :String;
+			private var uploadedUrl : String;
+			private var videoWidth : int = 320;
+			private var videoHeight:int = 240;
+			
+			import model.ActionBarItems;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			private var progressPage :UploadProgressView;
+			
+			private var browseFile:File = new File();
+			
+			protected function button4_clickHandler(event:MouseEvent):void
+			{
+				var fileFilters:Array = new Array();
+				fileFilters.push( new FileFilter( 'JPG', '*.jpg' ) );
+				fileFilters.push( new FileFilter( 'GIF', '*.gif' ) );
+				fileFilters.push( new FileFilter( 'PNG', '*.png' ) );
+				
+				browseFile.browseForOpen("Open File", fileFilters);
+				browseFile.addEventListener(Event.SELECT, selectedFileHandler);
+			}
+			
+			protected function resizeBitmap(bitmap:Bitmap, maxWidth:Number, maxHeight:Number):void
+			{
+				var bitmapData:BitmapData = bitmap.bitmapData;
+				var scaleFactor:Number = 1;
+				
+				var newWidth:Number = maxWidth;
+				var newHeight:Number = maxHeight;
+				
+				if(bitmapData.width > bitmapData.height)
+				{
+					scaleFactor = maxWidth / bitmapData.width;
+				}
+				else
+				{
+					scaleFactor = maxHeight / bitmapData.height;
+				}
+				
+				newWidth = bitmapData.width * scaleFactor;
+				newHeight = bitmapData.height * scaleFactor;
+				
+				var scaledBitmapData:BitmapData = new BitmapData(newWidth, newHeight);
+				var scaleMatrix:Matrix = new Matrix();
+				scaleMatrix.scale(scaleFactor, scaleFactor);
+				
+				scaledBitmapData.draw(bitmap, scaleMatrix);
+				bitmap.bitmapData = scaledBitmapData;
+			}
+			
+			protected function updateImageCropper(bitmap:Bitmap):void
+			{
+				var dim :int = bitmap.width/2;
+				if (bitmap.height/2 < dim)
+				{
+					dim = bitmap.height/2;
+				}
+				
+				this.imgCropper.setCropRect(dim, dim, bitmap.width/4, bitmap.height/4);
+				this.imgCropper.sourceImage = bitmap.bitmapData;
+			}
+			
+			protected function onImageLoadComplete (event:Event):void
+			{
+				var bitmap :Bitmap = Bitmap(LoaderInfo(event.target).content);
+				this.updateImageCropper(bitmap);				
+			}
+			
+			protected function selectedFileHandler(event:Event):void
+			{
+				Globals.LOG.info(browseFile.nativePath);
+				
+				if (browseFile.size < 2*1024000)
+				{
+					var stream:FileStream = new FileStream();
+					stream.open(browseFile, FileMode.READ);
+					var bytes:ByteArray = new ByteArray();
+					stream.readBytes(bytes);
+					
+					
+					var loader:Loader = new Loader();
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoadComplete);
+					loader.loadBytes(bytes);
+				}
+				else
+				{
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "File size must be less than 2MB.");
+				}
+				
+			}
+			
+			/*
+			* Initialization. Checks to see if there is an active camera.
+			*/
+			private function init():void 
+			{
+				initUploadResult.token = this.parabayService.initUpload(this.globals.token);
+				
+				if (Camera.getCamera())
+				{
+					setCamera();
+				}
+				else
+				{
+					trace("No cameras are available.");
+				}	
+			}
+			/*
+			* Sets the camera object to reference the default camera. Then 
+			* uses that camera for the video object's image. 
+			*/
+			private function setCamera():void
+			{
+				camera = Camera.getCamera();
+				camera.setMode(320, 240, 12, false);
+				camera.setQuality(0, 90);
+
+				video.attachCamera(camera);
+				camera.addEventListener(ActivityEvent.ACTIVITY, setSize);
+				video.width = 320;
+				video.height = 240;
+				this.localVideoElement.addChild(video);
+			}
+			
+			/*
+			* Sets the size of the video object, based on the size of the camera.
+			*/
+			private function setSize(...args):void 
+			{
+				camera.removeEventListener(ActivityEvent.ACTIVITY, setSize);
+				videoWidth = camera.width;
+				videoHeight = camera.height;
+			}
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				infoBar.includeInLayout = false;
+				infoBar.visible = false;
+				
+				var bitmapData :BitmapData = new BitmapData(320, 240);
+				bitmapData.draw(video);
+				bmd = bitmapData;
+				
+				url.text = "";
+				
+				var bmp:Bitmap = new Bitmap(bmd);
+				this.updateImageCropper(bmp);
+			}
+			
+			private function saveCroppedImage():void
+			{
+				// Get the cropped BitmapData	
+				var bmd:BitmapData = imgCropper.croppedBitmapData;
+				var bitmap:Bitmap = new Bitmap(bmd);			
+				this.resizeBitmap(bitmap, 160, 160);
+				
+				file = File.applicationStorageDirectory;
+				path = "images/" + new Date().time.toString() + ".jpg";
+				file = file.resolvePath(path);
+				trace(file.nativePath);
+				stream = new FileStream;
+				stream.open(file, FileMode.WRITE);
+				var data:ByteArray = getJPEG(bmd);
+				stream.writeBytes(data, 0, data.length);
+				stream.close();
+			}
+			
+			/*
+			* Converts a BitmapData object into JPEG data.
+			*/
+			private function getJPEG(bmd:BitmapData):ByteArray 
+			{
+				var jpg:JPGEncoder = new JPGEncoder();
+				return jpg.encode(bmd);
+			}
+			
+			/*
+			* Called when the user clicks the Upload button. Creates an array of the saved files,
+			* creates an Uploader object, adds the files to the Uploader object's file list, and then
+			* starts the upload.
+			*/
+			private function uploadFile(filePath:String):void
+			{
+				var uploader:Uploader = new Uploader();
+				
+				var file:File = File.applicationStorageDirectory.resolvePath(filePath);
+				uploader.addFile(file);
+				
+				uploader.addEventListener(Event.COMPLETE, uploadCompleteHandler);
+				uploader.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+				
+				if (this.uploadUrl)
+				{
+					uploader.start(this.uploadUrl);
+				}
+				else
+					trace("invalid upload url");
+			}	
+			
+			/*
+			* Upload progress handler.
+			*/ 
+			private function progressHandler(event:ProgressEvent):void
+			{
+				trace("Progress", event.bytesLoaded, event.bytesTotal);
+			}
+			
+			private function uploadCompleteHelper():void
+			{
+				progressPage.cancel();
+				progressPage=null;
+				
+				this.upload.enabled = false;
+				initUploadResult.token = this.parabayService.initUpload(this.globals.token);
+			}
+			
+			/*
+			* Upload complete handler.
+			*/
+			private function uploadCompleteHandler(event:Event):void
+			{
+				trace("complete");
+				
+				var ret : String = this.uploadedUrl ;
+				this.globals.lastUpload = ret;
+				this.imgCropper.sourceImage = ret;
+				this.imgCropper.setCropRect();
+				
+				infoBar.includeInLayout = true;
+				infoBar.visible = true;
+				infoBar.currentState = "info";
+				infoBar.message = "Upload successful";
+				
+				this.uploadCompleteHelper();				
+			}
+			
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				progressPage = new UploadProgressView();
+				progressPage.show("Uploading file...");
+				this.saveCroppedImage();
+				this.uploadFile(this.path);
+			}
+			
+			
+			protected function parabayService_resultHandler(event:ResultEvent):void
+			{
+				var uuid:String = UIDUtil.createUID();
+				this.uploadUrl = this.globals.SERVER_URL + event.result.uploadUrl;
+				this.uploadedUrl = this.globals.SERVER_URL + event.result.fileUrl;
+				
+				this.upload.enabled = true;
+			}
+			
+			public function back():void
+			{
+				video.attachCamera(null);
+				this.localVideoElement.removeChild(video);
+			}
+			
+			
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				if (navigator.length > 1)
+				{
+					back();
+					navigator.popView();
+				}
+			}
+			
+			protected function updateState():void
+			{
+				
+				var width:int = this.navigator.width;
+				var height:int = this.navigator.height;
+				
+				if (width < height)
+					this.currentState = "landscape";
+				else
+					this.currentState = "portrait";
+								
+				Globals.LOG.info("Updating state:(" + this.currentState + ") width=" + width + ", height=" + height);
+
+				if ((width>height && width <= 900) || width<500)
+				{
+					this.leftPane.width = 450;
+					this.tv.includeInLayout = false;
+					this.tv.visible = false;
+				}
+			}
+			
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				this.updateState();
+				this.addEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+			}
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+				this.removeEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+			}
+			
+			
+			protected function parabayService_faultHandler(event:FaultEvent):void
+			{
+				trace("error in init upload");
+			}
+			
+			protected function url_focusOutHandler(event:FocusEvent):void
+			{
+				this.imgCropper.sourceImage = this.url.text;
+				this.imgCropper.setCropRect();
+				
+				this.globals.lastUpload = this.url.text;
+			}
+			
+			protected function doCrop():void {
+				
+			}	
+			
+			protected function imageReady():void {
+				
+			}
+
+			protected function view1_stageHandler(event:Event):void
+			{
+				this.updateState();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:CallResponder id="initUploadResult" />
+		<parabay:Parabay id="parabayService" result="parabayService_resultHandler(event)" fault="parabayService_faultHandler(event)" />
+		
+		<s:VerticalLayout id="verticalLayout" gap="0" />
+		<s:HorizontalLayout id="horizontalLayout" />
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+		<s:State name="minimal"/>
+	</s:states>
+	
+	<s:Group	
+		layout.landscape="{verticalLayout}"
+		layout.portrait="{horizontalLayout}"
+		width="100%"
+		height="100%"
+		>
+		
+		<s:VGroup id="leftPane" width="501" height="350" >
+			<s:Group width="100%" top="0" left="0">
+				<assets:vintagetv id="tv" top="0" left="0" width="495" height="348"  visible="{leftPane.width>500}" includeInLayout="{leftPane.width>500}" /> 
+				<mx:UIComponent id="localVideoElement" left="40" top="45" />
+
+			</s:Group>
+		</s:VGroup>
+		
+			
+			
+			<s:VGroup id="rightPane" paddingTop="5" paddingLeft="5" horizontalAlign="center" width="100%"  >
+				
+				<s:HGroup horizontalAlign="center" width="100%">
+					<mx:Spacer width="5%" />
+					<s:Button label="Snap" click="button1_clickHandler(event)"  fontSize="12"/>
+					<assets:rarrow  />
+					<s:Button id="upload" enabled="false" label="Upload" click="button2_clickHandler(event)" fontSize="14" />
+					<assets:rarrow />
+					<s:Button label="Back" click="button3_clickHandler(event)" fontSize="12" />
+					<mx:Spacer width="5%" />
+				</s:HGroup>
+
+				<s:BorderContainer borderAlpha=".5" borderColor="white" backgroundAlpha="0">
+					<!-- <s:Image id="shot" width="320" height="240" />  -->
+					<components:ImageCropper id="imgCropper" width="160" height="120" enabled="true"  handleColor="#FF00FF" maskColor="#660066" maskAlpha="0.6"
+											 sourceImageReady="imageReady()"  sourceImageLoadError="trace('Error while loading image')" cropRectChanged="doCrop()" cropConstraintDisabled="true"
+											 cropConstraintChanged="trace('Crop constraint changed'); doCrop()" cropDimensionsChanged="trace('Crop dimensions changed'); doCrop()" cropPositionChanged="trace('Crop position changed'); doCrop()" />			
+					
+				</s:BorderContainer>
+				<views:InfoBar id="infoBar" width="160" horizontalAlign="center"  />
+				
+				<s:HGroup width="100%" horizontalAlign="center" paddingLeft="5" paddingRight="5" >
+					<s:TextInput id="url" text="{this.globals.lastUpload}" focusOut="url_focusOutHandler(event)" width="{rightPane.width*3/4-80}"  />
+					<s:Button id="chatButton" icon="{assets.photos}" height="52" click="button4_clickHandler(event)" />		
+				</s:HGroup>
+				<s:Label text="Take photo from webcam or browse for photos to upload." width="90%" horizontalCenter="true" maxDisplayedLines="2" paddingLeft="10" paddingRight="10" />
+			</s:VGroup>
+			
+
+		
+	</s:Group>
+</s:View>

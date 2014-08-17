@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Graphic version="2.0" viewHeight="292" viewWidth="387" ai:appVersion="15.0.0.399" ATE:version="1.0.0" flm:version="1.0.0" d:id="1" d:using="" xmlns="http://ns.adobe.com/fxg/2008" xmlns:ATE="http://ns.adobe.com/ate/2009" xmlns:ai="http://ns.adobe.com/ai/2009" xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:flm="http://ns.adobe.com/flame/2008">
+  <Library/>
+  <Group ai:artboardActive="1" ai:artboardIndex="0" ai:seqID="1" d:layerType="page" d:pageHeight="292" d:pageWidth="387" d:type="layer" d:userLabel="Artboard 1">
+    <Group ai:objID="e8e4c80" ai:seqID="2" d:id="2" d:type="layer" d:userLabel="Layer 1">
+      <Group x="-0.75" y="-0.21582" alpha="0.15" ai:objID="e213180" ai:seqID="3" flm:isolated="false">
+        <BitmapImage scaleX="0.85" scaleY="0.85" source="@Embed('blankscreenalpha.assets/images/Image_0003.png')" fillMode="clip" ai:embed="1" ai:objID="e24fc80" ai:seqID="4"/>
+      </Group>
+    </Group>
+  </Group>
+  <Private>
+      <ai:PrivateElement d:ref="#1">
+        <ai:SaveOptions>
+          <ai:Dict data="B includeXMP 0 B includeSymbol 0 B writeImages 1 B aiEditCap 1 I versionKey 2 I preserveFilterPolicy 3 I preserveTextPolicy 4 I preserveGradientPolicy 4 I expandBlendsOption 5 B downsampleLinkedImages 0 I rasterizeResolution 72 B includeObjectOutsideArtboard 0 "/>
+        </ai:SaveOptions>
+        <ai:DocData base="blankscreenalpha.assets/images" rulerCanvasDiffH="193.5" rulerCanvasDiffV="146.5">
+          <ai:DocRasterSettings>
+            <ai:Dict data="R padd 36 B mask 0 B spot 0 B alis 0 I dpi. 72 I colr 4 "/>
+          </ai:DocRasterSettings>
+        </ai:DocData>
+        <ai:AutoGenImageList>
+          <ai:Dict>
+            <ai:Entry name="0" value="Image_0003.png" valueType="U"/>
+          </ai:Dict>
+        </ai:AutoGenImageList>
+      </ai:PrivateElement>
+      <ai:PrivateElement flm:hashcode="3C9BC19FE2A33F410CEDC2A4F5A39B58" d:ref="#2">
+        <ai:LayerOptions color="5 79.31 257 128.502"/>
+      </ai:PrivateElement>
+    </Private>
+  </Graphic>

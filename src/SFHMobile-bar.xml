@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/2.5">
+	<id>com.parabay.SFHMobile</id>
+	<filename>SFH Video Chat</filename>
+	<name>Searching For Humans</name>
+	<versionNumber>9.2.0</versionNumber>
+	<copyright>2011 Parabay Inc</copyright>
+	<initialWindow>
+		<content>SFHMobile.swf</content>
+	</initialWindow>
+	<icon>
+		<image72x72>icon72.png</image72x72>
+	</icon>
+</application>

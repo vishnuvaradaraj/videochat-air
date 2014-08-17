@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:maps="com.google.maps.*" 
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Map" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here-->
+
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" paddingTop="15" paddingLeft="20" paddingBottom="10">
+			<s:Label text="{this.dist}" width="100%" />		
+		</s:HGroup>
+		
+		<maps:Map id="map" width="100%" height="100%" key="ABQIAAAATtyzyFvR57Gp0thfat6RFhSfFUND8yDaeGXPYSK8qNJceeOtrhR2CyVVvyeUKo7ThTX4RHWzxDVRrA" url="http://parabay.com" sensor="false" mapevent_mapready="map_mapevent_mapreadyHandler(event)" mapevent_mappreinitialize="map_mapevent_mappreinitializeHandler(event)" />		
+	</s:VGroup>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.google.maps.InfoWindowOptions;
+			import com.google.maps.LatLng;
+			import com.google.maps.LatLngBounds;
+			import com.google.maps.Map;
+			import com.google.maps.MapEvent;
+			import com.google.maps.MapMouseEvent;
+			import com.google.maps.MapOptions;
+			import com.google.maps.MapType;
+			import com.google.maps.controls.ZoomControl;
+			import com.google.maps.overlays.Marker;
+			import com.google.maps.overlays.MarkerOptions;
+			import com.google.maps.services.ClientGeocoder;
+			import com.google.maps.services.ClientGeocoderOptions;
+			import com.google.maps.services.GeocodingEvent;
+			
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.ViewNavigatorEvent;
+
+			private var geocoder:ClientGeocoder;
+			private var marker1:Marker;
+			private var marker2:Marker;
+			
+			[Bindable]
+			private var dist :String;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			import model.ActionBarItems;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			private function onMapReady(event:Event):void {
+				map.enableScrollWheelZoom();
+				map.enableContinuousZoom();
+				map.addControl(new ZoomControl());
+				
+			}
+			
+			private function doGeocode(event:Event):void {
+				// Geocoding example
+				
+				this.geocoder = new ClientGeocoder();
+				
+				this.geocoder.addEventListener(
+					GeocodingEvent.GEOCODING_SUCCESS,
+					function(event:GeocodingEvent):void {
+						var placemarks:Array = event.response.placemarks;
+						if (placemarks.length > 0) {
+							map.setCenter(placemarks[0].point);
+							var marker:Marker = new Marker(placemarks[0].point);
+							
+							marker.addEventListener(MapMouseEvent.CLICK, function (event:MapMouseEvent):void {
+								marker.openInfoWindow(new InfoWindowOptions({content: placemarks[0].address}));
+							});
+							map.addOverlay(marker);							
+						}
+					});
+				this.geocoder.addEventListener(
+					GeocodingEvent.GEOCODING_FAILURE,
+					function(event:GeocodingEvent):void {
+						trace(event);
+						trace(event.status);
+					});
+				
+				//this.geocoder.geocode(address.text);
+			}
+
+
+			protected function onClickMarker1(event:MapMouseEvent):void {
+				marker1.openInfoWindow(new InfoWindowOptions({content: this.data.nick}));
+			}
+			
+			protected function onClickMarker2(event:MapMouseEvent):void {
+				marker2.openInfoWindow(new InfoWindowOptions({content: this.globals.currentUser.nick}));
+			}
+			
+			protected function map_mapevent_mapreadyHandler(event:MapEvent):void
+			{
+				this.onMapReady(event);
+				
+				var bounds:LatLngBounds = new LatLngBounds();
+				
+				if (this.data.location && this.data.location.length>0 && this.globals.currentUser.location && this.globals.currentUser.location.length>0)
+				{
+					var loc:LatLng = LatLng.fromUrlValue(this.data.location);
+					var loc2:LatLng = LatLng.fromUrlValue(this.globals.currentUser.location);
+					
+					bounds.extend(loc);
+					bounds.extend(loc2);
+					
+					var distance:Number = Math.round(loc.distanceFrom(loc2)/1000*100)/100;
+					dist = this.data.nick + " (" + distance.toString() + " km away)";
+					
+					map.setCenter(bounds.getCenter());
+					map.setZoom(map.getBoundsZoomLevel(bounds));
+					
+					marker1 = new Marker(loc);	
+					marker1.addEventListener(MapMouseEvent.CLICK, onClickMarker1);
+					map.addOverlay(marker1);	
+					
+					marker2 = new Marker(loc2);	
+					marker2.addEventListener(MapMouseEvent.CLICK, onClickMarker2);
+					map.addOverlay(marker2);
+				}
+				else if (this.data.location && this.data.location.length>0)
+				{
+					this.dist = "Distance data is not available";
+					
+					var locn:LatLng = LatLng.fromUrlValue(this.data.location);
+					map.setCenter(locn);
+					map.setZoom(15);
+					
+					marker1 = new Marker(locn);	
+					marker1.addEventListener(MapMouseEvent.CLICK, onClickMarker1);
+					map.addOverlay(marker1);	
+
+				}
+				else
+				{
+					this.dist = "User location not available";
+					map.setZoom(5);
+				}
+			}
+
+
+			protected function map_mapevent_mappreinitializeHandler(event:MapEvent):void
+			{
+				var myMapOptions:MapOptions = new MapOptions();           
+				myMapOptions.zoom = 15;  
+				myMapOptions.mapType = MapType.HYBRID_MAP_TYPE; 
+				this.map.setInitOptions(myMapOptions); 
+			}
+
+
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = true;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.search = false;				
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.chat = false;
+			}
+
+
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+			}
+
+		]]>
+	</fx:Script>
+
+</s:View>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:mx="library://ns.adobe.com/flex/halo" 
+		xmlns:mx1="library://ns.adobe.com/flex/mx"
+		xmlns:views="views.*" xmlns:components="components.*" creationComplete="view1_creationCompleteHandler(event)" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Public Chat" xmlns:assets="assets.*"  >
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			import assets.greenorb;
+			import assets.phone;
+			import assets.shutdown;
+			import assets.stop;
+			import assets.vintagetv;
+			
+			import components.RoundedImage;
+			
+			import events.ChatEvent;
+			import events.PeerStatusEvent;
+			import events.StatusInfoEvent;
+			import events.UserEvent;
+			import events.VideoChangeEvent;
+			
+			import flash.events.TimerEvent;
+			import flash.utils.Timer;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import p2p.CallManager;
+			import p2p.LocalFileLoader;
+			import p2p.P2PFileShare;
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+			import p2p.UserObject;
+			import p2p.VideoSession;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			
+			[Bindable]
+			protected var userCount:int = 0;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			private var fileLoader:LocalFileLoader;
+			[Bindable]
+			private var fileShare:P2PFileShare;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+						
+			[Bindable]
+			private var message:String = "Public chat - 10+ users online";
+			
+			private function initFileSharing(conn:NetConnection, group:NetGroup):void
+			{
+				fileLoader = new LocalFileLoader();
+				fileLoader.addEventListener(StatusEvent.STATUS,onStatus);
+				fileLoader.addEventListener(Event.COMPLETE,fileLoaderComplete);
+				
+				fileShare = new P2PFileShare();
+				fileShare.addEventListener(StatusEvent.STATUS,onStatus);
+				fileShare.addEventListener(Event.COMPLETE,fileShareComplete);
+				
+				fileShare.init(conn, group);				
+			}
+			
+			private function onStatus(event:StatusEvent):void
+			{
+				writeText(event.level);				
+			}
+			
+			private function fileLoaderComplete(event:Event):void
+			{
+				writeText("fileLoaderComplete");
+				
+				fileShare.startSharing(fileLoader.p2pSharedObject);				
+			}
+			
+			private function writeText(txt:String):void
+			{
+				trace(txt+"\n");
+			}
+			
+			private function fileShareComplete(event:Event):void
+			{
+				writeText("fileShareComplete");
+				
+				//fileShare.p2pSharedObject.data;
+			}
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				initFileSharing(P2PSession.connection, globals.p2pSession.group);
+			}
+			
+			public function back():void
+			{
+				trace("back clicked.");
+				
+			}
+			
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				Globals.LOG.info("Chat PAGE - activate");
+				
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.messages = true;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				this.updateState();
+				this.addEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+				
+				this.userCount = this.globals.recentUsers.users.length + 1;
+				this.updateMessage();
+				
+				this.globals.p2pSession.chatGroup.addEventListener(PeerStatusEvent.USER_ADDED, userListUpdate,false,0,true);
+				this.globals.p2pSession.chatGroup.addEventListener(PeerStatusEvent.USER_REMOVED, userListUpdate,false,0,true);
+			}
+			
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				Globals.LOG.info("VIDEO PAGE - deactivate");
+				this.globals.actionBarItems = this.actionBarItems;
+				
+				this.removeEventListener(ResizeEvent.RESIZE, view1_stageHandler);
+				this.globals.p2pSession.chatGroup.removeEventListener(PeerStatusEvent.USER_ADDED, userListUpdate);
+				this.globals.p2pSession.chatGroup.removeEventListener(PeerStatusEvent.USER_REMOVED, userListUpdate);
+			}
+			
+			protected function updateMessage():void
+			{
+				this.message = "Public Chat - " + this.userCount + "+ users online.";	
+			}
+			
+			public function userListUpdate(msg:PeerStatusEvent):void 
+			{
+				if (msg.type == "userAdded")
+				{
+					this.userCount++;				
+				}
+				else if (msg.type == "userRemoved")
+				{
+					this.userCount--;
+				}
+				this.updateMessage();
+			}
+			
+			protected function updateState():void
+			{
+				
+				var width:int = this.navigator.width;
+				var height:int = this.navigator.height;
+				
+				if (width < height)
+					this.currentState = "landscape";
+				else
+					this.currentState = "portrait";
+				
+				Globals.LOG.info("Updating state:(" + this.currentState + ") width=" + width + ", height=" + height);						
+			}
+			
+			protected function view1_stageHandler(event:Event):void
+			{
+				this.updateState();
+			}
+
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				if (list.selectedItem && list.selectedItem.sender)
+				{
+					var u:UserObject = list.selectedItem.sender as UserObject;
+					if (u)
+					{
+						var p2pUser :P2PUser = new P2PUser(u, this.globals.callManager);
+						navigator.pushView(UserDetailsPage, p2pUser);
+					}
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:VerticalLayout id="verticalLayout" />
+		<s:HorizontalLayout id="horizontalLayout" />
+		
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="landscape" />
+		<s:State name="portrait"/>
+	</s:states>
+	
+
+	<s:VGroup	
+		width="100%"
+		height="100%"
+		>
+		<views:InfoBar id="messageBar" width="100%" currentState="info" message="{this.message}" includeInLayout="true" visible="true"/>
+		<views:ChatSender isPrivate="false"  />
+
+		<s:Scroller width="100%" height="100%" includeInLayout="{this.globals.recentChats.messages.length>0}" visible="{this.globals.recentChats.messages.length>0}" >
+			<s:Group>			
+				<s:List id="list" top="0" bottom="0" left="0" right="0"  width="100%" change="list_changeHandler(event)">
+					<s:AsyncListView list="{this.globals.recentChats.messages}"/>
+					<s:itemRenderer>
+						<fx:Component>
+							<s:IconItemRenderer
+								paddingTop="8" paddingBottom="8" verticalGap="6"
+								labelField="title"
+								iconField="photo" iconHeight="79" iconWidth="79"
+								messageField="message" >
+								<fx:Script>
+									<![CDATA[
+										import assets.Chevron;
+									]]>
+								</fx:Script>
+							</s:IconItemRenderer>
+							
+							
+						</fx:Component>
+					</s:itemRenderer> 
+					
+				</s:List>	
+			</s:Group>
+		</s:Scroller>
+
+		<s:RichText id="noUsers" text="No new messages since you logged in." textAlign="center" left="20" right="20" includeInLayout="{this.globals.recentChats.messages.length==0}" visible="{this.globals.recentChats.messages.length==0}" paddingLeft="30" paddingTop="30"/>
+
+	</s:VGroup>
+	
+</s:View>

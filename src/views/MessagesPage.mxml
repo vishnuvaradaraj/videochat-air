@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Comments" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)" xmlns:views="views.*">
+
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serialization.json.JSON;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import p2p.P2PUser;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			
+			[Bindable]
+			private var globals :Globals = Globals.getInstance();
+
+			[Bindable]
+			private var includePrivate:Boolean = false;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{		
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = true;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.search = false;				
+				this.globals.actionBarItems.more = true;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.chat = false;
+				
+				var q : Object = new Object();
+				q.kind = "Friends_Queue";
+				q.columns = [];
+				q.filters = [];
+				q.orders = ["-created"];
+				
+				var user :P2PUser = this.data as P2PUser;
+				if (user.nick == this.globals.currentUser.nick)
+				{
+					this.includePrivate = true;
+				}
+				
+				var filterUser :Object = new Object();
+				filterUser.condition = "targetUser =";
+				filterUser.param = user.nick;
+				filterUser.type = "string";
+				q.filters.push(filterUser);
+
+				if (!this.includePrivate)
+				{
+					var filterPrivate :Object = new Object();
+					filterPrivate.condition = "isPrivate =";
+					filterPrivate.param = this.includePrivate;
+					filterPrivate.type = "boolean";
+					q.filters.push(filterPrivate);
+				}
+
+				var ret :String = com.adobe.serialization.json.JSON.encode(q);
+				this.globals.messagesList.query = ret;
+
+				this.globals.messagesList.init(this, navigator);
+
+			}
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+				this.globals.messagesList.deinit();
+			}
+
+			public function refresh():void
+			{
+				trace("refresh clicked.");
+				this.globals.messagesList.getData(true);
+			}
+			
+			public function more():void
+			{
+				this.globals.messagesList.getData(true);
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" height="100%" gap="15" >
+		
+		<views:InCallsPage id="inCallsPage" width="100%" navigator="{navigator}" />
+			
+		<views:AddCommentView id="addComments" width="100%" targetUser="{this.data}" includeInLayout="{!this.includePrivate}" visible="{!this.includePrivate}" />
+		
+		<s:Scroller width="100%" height="100%" includeInLayout="{this.globals.messagesList.list.length>0}" visible="{this.globals.messagesList.list.length>0}" >
+			<s:Group>			
+				<s:List id="list" top="0" bottom="0" left="0" right="0" width="100%" >
+					<s:AsyncListView list="{this.globals.messagesList.list}"/>
+					<s:itemRenderer>
+						<fx:Component>
+							<s:IconItemRenderer
+								paddingTop="8" paddingBottom="8" verticalGap="6"
+								labelField="owner"
+								iconField="sourcePhoto" iconHeight="79" iconWidth="79"
+								messageField="comments"/>
+							
+						</fx:Component>
+					</s:itemRenderer> 
+					
+				</s:List>	
+			</s:Group>
+		</s:Scroller>
+		
+		<s:RichText id="noUsers" text="No comments." textAlign="center" left="20" right="20" includeInLayout="{this.globals.messagesList.list.length==0}" visible="{this.globals.messagesList.list.length==0}" paddingLeft="30" paddingTop="30"/>
+		
+	</s:VGroup>
+
+</s:View>

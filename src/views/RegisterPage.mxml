@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:components="components.*"
+		xmlns:pbay="services.parabay.*" viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Register" xmlns:views="views.*" xmlns:ipinfo="services.ipinfo.*" >
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.greenbutton;
+			import assets.sfhicon;
+			
+			import com.adobe.serialization.json.JSON;
+			import com.adobe.serializers.utility.TypeUtility;
+			import com.google.maps.services.ClientGeocoder;
+			import com.google.maps.services.GeocodingEvent;
+			
+			import components.InformationBox;
+			
+			import model.Globals;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import services.ipinfo.IpInfo;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			
+			private var globals :Globals = Globals.getInstance();
+			
+			private var locn:String= "";
+			
+			private var user : Object ;
+				
+			import model.ActionBarItems;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			protected function handleBusy(isBusy:Boolean):void
+			{
+				this.busyIndicator.busy = isBusy;
+				this.loginButton.enabled = !isBusy;
+				this.username.enabled = !isBusy;
+				this.password.enabled = !isBusy;
+			}
+			
+			protected function registerButton_clickHandler(event:MouseEvent):void
+			{
+				if (this.username.text.length == 0)
+				{
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Please select an user name first.");
+					return;
+				}
+				
+				if (this.password.text.length == 0)
+				{
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Please enter a valid password.");
+					return;
+				}
+
+				if (this.email.text.length == 0)
+				{
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Please enter a valid email address.");
+					return;
+				}
+				
+				if (this.agree.selected)
+				{		
+					this.handleBusy(true);
+					
+					var token :String = globals.token;
+					
+					user = new Object();
+					user.name = username.text;
+					user.password = password.text;
+					user.email = email.text;
+											
+					var jsonu :String = com.adobe.serialization.json.JSON.encode(user);				
+					registerUserResult.token = parabayService.registerUser(jsonu, "ParabayOrg-Friends");
+				}
+				else
+				{ 
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "You have to accept the terms of service first.");
+				}
+			}
+			
+			protected function parabayService_faultHandler(event:FaultEvent):void
+			{
+				trace("Failed to call register service");
+				
+				this.handleBusy(false);
+				
+				infoBar.includeInLayout = true;
+				infoBar.currentState = "error";
+				infoBar.message = "Failed to contact server.";
+				
+			}
+			
+			protected function registerUserResult_resultHandler(event:ResultEvent):void
+			{
+				this.handleBusy(false);
+				
+				if ( event.result.status == 0 ) 
+				{
+					globals.token = event.result.token;
+					infoBar.includeInLayout = false;
+					globals.p2pUsersList.removeAll();
+					
+					navigator.pushView(views.ProfilePage, this.user);
+				}				
+				else
+				{
+					trace("Register failure");	
+					infoBar.includeInLayout = true;
+					infoBar.currentState = "error";
+					infoBar.message = "Failed to register user";
+				}
+			}
+			
+						
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				checkUserResult.token = parabayService.checkUserID(this.username.text);
+				
+				checkUserIndicator.includeInLayout = true;
+				checkUserIndicator.busy = true;
+			}
+
+
+			protected function checkUserResult_resultHandler(event:ResultEvent):void
+			{
+				checkUserIndicator.busy = false;
+				
+				infoBar.includeInLayout = true;
+				
+				if ( event.result.status != 0 ) 
+				{
+					infoBar.currentState = "info";
+					infoBar.message = "User id is available";
+				}
+				else
+				{
+					infoBar.currentState = "error";
+					infoBar.message = "User id is not available";
+				}
+			}
+
+
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.home = false;
+				this.globals.actionBarItems.messages = false;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+			}
+
+
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+			}
+
+
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("http://parabay.appspot.com/home/tos"));
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+
+		<pbay:Parabay id="parabayService"  fault="parabayService_faultHandler(event)"/>
+
+		<s:CallResponder id="registerUserResult" result="registerUserResult_resultHandler(event)" />
+		<s:CallResponder id="checkUserResult" result="checkUserResult_resultHandler(event)"  />
+		
+		<!--
+		<s:CallResponder id="saveFriendResult" result="saveFriendResult_resultHandler(event)" />
+		
+		<s:CallResponder id="ipResult" />
+		<ipinfo:IpInfo id="ipInfo" result="ipInfo_resultHandler(event)" />
+		-->
+	</fx:Declarations>	
+	
+	<s:states>
+		<s:State name="portrait" />
+		<s:State name="landscape"/>
+	</s:states>
+	
+	<s:Scroller width="100%" height="100%" >
+		
+	<s:VGroup width="100%" height="100%" paddingLeft="0" paddingTop="0" paddingRight="0" paddingBottom="0" gap="0">
+		
+		<views:InfoBar id="infoBar" width="100%" currentState="error" message="hello world"/>
+		
+		
+					
+					<s:VGroup width="100%" paddingLeft="20" paddingTop="20" paddingRight="20" paddingBottom="30" gap="5">
+												
+						<s:VGroup width="100%">
+							<s:Label text="Username"/>	
+							<s:HGroup width="100%">
+								<s:TextInput id="username" width="100%"/>
+								<components:BusyIndicator includeInLayout="false" id="checkUserIndicator" busy="false"  
+														   width="79" height="79"  />
+								<s:Button label="Check" click="button1_clickHandler(event)" />
+							</s:HGroup>
+										
+						</s:VGroup>
+						
+						<s:VGroup width="100%" paddingTop="10">
+							<s:Label text="Password"/>
+							<s:TextInput id="password" width="100%" displayAsPassword="true"/>
+						</s:VGroup>
+						
+						<s:VGroup width="100%">
+							<s:Label text="Email"/>			
+							<s:TextInput id="email" width="100%"/>			
+						</s:VGroup>
+						
+						<s:HGroup width="100%">
+							<s:CheckBox id="agree" selected="true" />
+							<s:VGroup paddingTop="5">
+								<s:Button skinClass="skins.LinkButtonSkin" label="I am over 18 (see TOS)" click="button2_clickHandler(event)" />	
+							</s:VGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" horizontalAlign="right" paddingTop="5">
+							<mx:Spacer width="100%" />
+							<components:BusyIndicator id="busyIndicator" busy="false"  
+													  width="79" height="79"  />
+							
+
+							<s:Button id="loginButton" label="Register" click="registerButton_clickHandler(event)" color="0xE8E8E8"/>	
+						</s:HGroup>
+					
+				</s:VGroup>	
+						
+	</s:VGroup>	
+	</s:Scroller>
+
+</s:View>

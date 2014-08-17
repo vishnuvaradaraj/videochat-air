@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:views="views.*" xmlns:components="components.*"
+		xmlns:pbay="services.parabay.*" 
+		xmlns:s="library://ns.adobe.com/flex/spark"  viewActivate="view1_viewActivateHandler(event)" viewDeactivate="view1_viewDeactivateHandler(event)"
+		title="Friend Details" xmlns:assets="assets.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			import assets.messages;
+			import assets.phone;
+			import assets.tv;
+			
+			import com.adobe.utils.DateUtil;
+			
+			import components.InformationBox;
+			
+			import model.ActionBarItems;
+			import model.Globals;
+			import model.UserDetailsItem;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PUser;
+			import p2p.UserObject;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.ViewNavigatorEvent;
+			
+			import valueObjects.UserDetailsResult;
+			
+			[Bindable]
+			public var actionBarItems :ActionBarItems = new ActionBarItems();
+			
+			[Bindable]
+			protected var actions:ArrayCollection;
+			
+			[Embed("assets/sms.png")]
+			private var smsIcon:Class;
+			
+			[Embed("assets/phone.png")]
+			private var phoneIcon:Class;
+			
+			[Embed("assets/mail.png")]
+			private var mailIcon:Class;
+			
+			protected var user :P2PUser;
+			
+			[Bindable]
+			private var globals:Globals=Globals.getInstance();
+			
+			private var callProgressView : CallProgressView;
+			
+			private var  progressPage :UploadProgressView;
+			
+			[Bindable]
+			public var isOnline:Boolean = false;
+			
+			[Bindable]
+			public var distance:String = "";
+			
+			
+			protected function updateOnlineStatus(id:String):void
+			{
+				this.isOnline = Globals.getInstance().p2pSession.pingUser(id);
+				if (this.isOnline)
+				{
+					this.onlineStatus.text = "I am online now.";
+				}
+				else
+				{
+					this.onlineStatus.text = "I am not online now, but message me?";
+				}
+				
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				this.user = value as P2PUser;
+				
+				this.updateStats(Globals.CLICK_USER_DETAILS, true);
+				
+				actions = new ArrayCollection();
+				
+				if (data.hasOwnProperty("id") && data.id && data.id.length>0)
+				{									
+					actions.addItem(new UserDetailsItem("video", "Video Call", 
+						"Start a video call", assets.tv));
+					actions.addItem(new UserDetailsItem("chat", "Chat", 
+						"Chat with " + data.nick, assets.chaticon));
+				}
+				
+				var loc1:String = this.user.location;
+				var loc2:String = this.globals.currentUser.location;
+				
+				if (loc1 && loc1.length>0 && loc2 && loc2.length>0)
+				{
+					var locs1:Array = loc1.split(",");
+					var locs2:Array = loc2.split(",");
+					
+					if (locs1.length==2 && locs2.length==2)
+					{
+						var dist:Number = this.globals.distanceBetweenPoints(Number(locs1[0]), Number(locs1[1]), Number(locs2[0]), Number(locs2[1]));
+						this.distance = " (" + dist.toString() + " km away)";
+					}
+				}
+				
+				actions.addItem(new UserDetailsItem("message", "Messages", 
+					"Post a message", assets.messages));
+				
+				if (data.hasOwnProperty("location") && data.location && data.location.length>0)
+				{
+					actions.addItem(new UserDetailsItem("map", "Map", 
+						"Map user location", assets.map));
+				}
+				
+				if (data.hasOwnProperty("primaryPhone")) 
+				{
+					actions.addItem(new UserDetailsItem("tel", "Phone Call", 
+						data.primaryPhone, assets.phone));
+				}
+			}
+			
+			protected function updateStats(action:int, success:Boolean):void
+			{				
+				var o:Object = new Object();
+				o.dest = this.user.nick;
+				o.action = action;
+				o.action_time = DateUtil.toW3CDTF(new Date());
+				o.is_ok = success;
+				o.body = 'user_details';
+				this.globals.appendStats(o);	
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				var approved:int = Globals.getInstance().serverSettings.approved;
+				if (approved)
+				{
+					var action:UserDetailsItem = list.selectedItem as UserDetailsItem;
+					switch (action.type)
+					{
+						case "tel":
+							navigateToURL(new URLRequest("tel:"+action.details));
+							break;
+						
+						case "map":
+							
+							progressPage = new UploadProgressView();
+							progressPage.show("Loading map...");
+							
+							navigator.pushView(views.MapPage, data);
+							break;
+						
+						case "message":
+							navigator.pushView(views.MessagesPage, data);
+							break;
+						
+						case "video":
+						case "chat":
+							var param : Object = new Object();
+							param.user = data;
+							param.action = "call";
+							param.chatOnly = (action.type == "chat" ? true : false);
+							
+							callProgressView = new CallProgressView();
+							callProgressView.show(navigator, param);
+							break;				
+					}	
+				}
+				else
+				{
+					this.updateStats(Globals.CLICK_USER_NOT_APPROVED, true);
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Your profile is not yet approved.");
+					Globals.LOG.error("Unapproved user cannot contact others");
+				}
+			}
+			
+			public function refresh():void
+			{
+				trace("refresh clicked.");
+				this.updateOnlineStatus(user.id);
+				if (!this.isOnline)
+				{
+					var token :String = Globals.getInstance().token;
+					this.userDetailsResult.token = this.parabayService.userDetails(token, this.user.nick);
+					
+				}
+			}
+			
+			public function back():void
+			{
+				trace("back clicked.");
+				callProgressView=null;
+			}
+			
+			protected function view1_viewActivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.actionBarItems = this.globals.actionBarItems;
+				this.globals.actionBarItems.search = false;
+				this.globals.actionBarItems.refresh = false;
+				this.globals.actionBarItems.messages = true;
+				this.globals.actionBarItems.home = true;
+				this.globals.actionBarItems.more = false;
+				this.globals.actionBarItems.back = (navigator.length>1 ? true : false);
+				this.globals.actionBarItems.settings = false;
+				this.globals.actionBarItems.chat = false;
+				
+				this.inCallsPage.onActivate();
+				
+				this.updateOnlineStatus(user.id);
+				if (!this.isOnline)
+				{
+					var token :String = Globals.getInstance().token;
+					this.userDetailsResult.token = this.parabayService.userDetails(token, this.user.nick);
+					
+				}
+				
+			}
+			
+			
+			protected function view1_viewDeactivateHandler(event:ViewNavigatorEvent):void
+			{
+				this.globals.actionBarItems = this.actionBarItems;
+				
+				this.inCallsPage.onDeActivate();
+				
+			}
+			
+			
+			protected function accept1_clickHandler(event:MouseEvent):void
+			{
+				this.user.data.approved = 1;
+				approveUserResult.token = parabayService.approveUser(this.globals.token, this.user.nick, "1");
+				this.globals.userCache.saveUser(this.user.data);
+			}
+			
+			
+			protected function reject1_clickHandler(event:MouseEvent):void
+			{
+				this.user.data.approved = 0;
+				approveUserResult.token = parabayService.approveUser(this.globals.token, this.user.nick, "0");
+				this.globals.userCache.saveUser(this.user.data);
+			}
+			
+			
+			protected function approveUserResult_resultHandler(event:ResultEvent):void
+			{
+				if ( event.result.status == 0 ) 
+				{
+					InformationBox.show(this, InformationBox.IC_INFO, "Info", "Approval request submitted successfully.");
+				}
+				else
+				{
+					InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Approval request failed.");
+				}
+			}
+			
+			
+			protected function approveUserResult_faultHandler(event:FaultEvent):void
+			{
+				InformationBox.show(this, InformationBox.IC_ALERT, "Error", "Approval request failed.");
+			}
+			
+			public function userDetailsResult_resultHandler(event:ResultEvent):void
+			{ 
+				trace("Refreshed user data:" + this.user.nick);
+				var userDetails:UserDetailsResult = event.result as UserDetailsResult;
+				if (userDetails.friend && (userDetails.friend.peerId != this.user.peerId))
+				{
+					trace("Got new peerid for: " + this.user.nick);
+					
+					this.user.peerId = userDetails.friend.peerId;
+					
+					var userObj:UserObject = new UserObject(this.user);
+					userObj.id = this.user.peerId;
+					userObj.peerId = this.user.peerId;
+					userObj.photo = this.user.peerId;
+					
+					this.updateOnlineStatus(userDetails.friend.peerId);
+					
+					Globals.getInstance().userCache.saveUser(userObj);
+				}
+			}
+			
+			public function userDetailsResult_faultHandler(event:FaultEvent):void
+			{ 
+				trace("Error refreshing user details");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<s:CallResponder id="userDetailsResult" result="userDetailsResult_resultHandler(event)" fault="userDetailsResult_faultHandler(event)" />
+		<s:CallResponder id="approveUserResult" result="approveUserResult_resultHandler(event)" fault="approveUserResult_faultHandler(event)" />
+		<pbay:Parabay id="parabayService"/>
+	</fx:Declarations>	
+	
+	<s:VGroup width="100%" height="100%" gap="0">
+		<views:InCallsPage id="inCallsPage" width="100%" navigator="{navigator}"/>
+		
+		
+		<s:HGroup verticalAlign="middle" gap="12">
+			
+			<s:Image source="{data.photo}" skinClass="skins.HeasdshotSkin" width="160" height="160"/>
+			
+			<s:VGroup>
+				
+				<s:HGroup>
+					<s:Label text="{data.title}"/>
+					<s:Label text=" " />
+					<s:Label text="{this.distance}"/>				
+				</s:HGroup>
+				
+				<s:Label text="{data.message}"/>
+				<s:Label id="onlineStatus" fontStyle="italic" fontSize="15"/>
+				
+				<s:HGroup visible="{this.globals.currentUser.nick == 'supports'}" includeInLayout="{this.globals.currentUser.nick == 'support'}">
+					<assets:accept click="accept1_clickHandler(event)" />
+					<assets:reject click="reject1_clickHandler(event)" />
+				</s:HGroup>
+				
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:Scroller width="100%" height="100%">
+			<s:Group> 
+				
+				<s:List id="list" dataProvider="{actions}" 
+						 width="{navigator.width}" height="100%"
+						change="list_changeHandler(event)">
+					<s:itemRenderer>
+						<fx:Component>
+							<s:IconItemRenderer
+								paddingTop="8" paddingBottom="8" verticalGap="6" paddingRight="5"
+								labelField="name" 
+								messageField="details" 
+								decorator="{data.icon}"/>
+						</fx:Component>
+					</s:itemRenderer>
+				</s:List>
+			</s:Group>
+		</s:Scroller> 
+		
+		
+	</s:VGroup>
+</s:View>

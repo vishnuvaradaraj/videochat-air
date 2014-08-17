@@ -1,0 +1,86 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+
+@font-face 
+{
+	src:url("/assets/MYRIAD.TTF");
+	font-family: "EmbeddedMyriadWeb";
+	advanced-anti-aliasing: true;
+	embedAsCFF: true;
+}
+
+@font-face 
+{
+	src:url("/assets/MYRIADB_0.TTF");
+	font-family: "EmbeddedMyriadWebBold";
+	font-weight: bold;
+	advanced-anti-aliasing: true;
+	embedAsCFF: true;
+}
+
+s|Label
+{
+	font-family: "EmbeddedMyriadWeb";
+}
+
+.bold
+{
+	font-family: "EmbeddedMyriadWebBold";
+	font-weight: bold;
+}
+
+global
+{
+	/* framework styles */
+	color: #FFFFFF;
+	chromeColor: #464646;
+	contentBackgroundColor: #3F3F3F;
+	downColor: #E0E0E0; /* set in here and not in framework's default.css because it only is really applicable for touch interactions*/
+	selectionColor: #B2B2B2;
+	alternatingItemColors: #3F3F3F;
+	rollOverColor: #CEDBEF;
+	focusColor: #56A6FF;
+	textShadowColor: #000000;
+	textShadowAlpha: .55;	
+	borderVisible : true;
+	borderWeight : 1;
+	borderColor: #000000;
+}
+
+s|ViewNavigatorApplication
+{
+	backgroundColor: #484848;
+}
+
+s|SkinnableContainer
+{
+	backgroundColor: #484848;
+}
+
+s|View
+{
+	backgroundColor: #484848;
+}
+
+s|List
+{
+	skinClass: ClassReference("spark.skins.mobile.ListSkin");
+	borderColor: #000000;
+	borderAlpha: 1;
+	verticalScrollPolicy: on;
+	borderVisible: true;
+}
+
+s|IconItemRenderer
+{
+	fontSize: 20;
+	font-weight: bold;
+}
+
+.iconItemRendererMessageStyle
+{
+	font-weight: normal;
+	font-size: 14;
+	color: #DDDDDD;
+}
+

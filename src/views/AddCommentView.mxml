@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" width="100%" paddingTop="15" paddingLeft="15" xmlns:parabay="services.parabay.*" xmlns:mx="library://ns.adobe.com/flex/mx" >
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			
+			import com.adobe.serialization.json.JSON;
+			
+			import model.Globals;
+			
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import p2p.P2PSession;
+			import p2p.P2PUser;
+
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			[Bindable]
+			public var targetUser:P2PUser;
+
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				trace("Sending comments:" + chatText.text);
+				this.postComment(chatText.text);
+				chatText.text = "";
+			}
+			
+			
+			protected function chatText_keyDownHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					trace("Sending comments(enter):" + chatText.text);
+					this.postComment(chatText.text);
+					chatText.text = "";
+				}
+			}
+			
+			protected function handleBusy(isBusy:Boolean):void
+			{
+				this.chatButton.enabled = !isBusy;
+				this.chatText.enabled = !isBusy;
+			}
+			
+			protected function postComment(msg:String):void
+			{
+				this.handleBusy(true);
+				
+				var comment : Object = new Object();
+				if (this.targetUser)
+				{
+					comment.targetUser = this.targetUser.nick;
+				}
+				comment.comments  = msg;
+				comment.itemType = 1;
+				comment.sourcePhoto = this.globals.currentUser.photo;
+				comment.isPrivate = this.isPrivate.selected;
+				
+				var jsonComment : String = com.adobe.serialization.json.JSON.encode(comment);
+				addCommentResult.token = parabayService.saveQueue(this.globals.token, jsonComment);
+				
+				var isOnline:Boolean = Globals.getInstance().p2pSession.pingUser(this.targetUser.id);
+				if (isOnline)
+				{
+					globals.p2pSession.chatGroup.chatSend(msg, true, this.targetUser.id);
+				}
+			}
+			
+			protected function addCommentResult_resultHandler(event:ResultEvent):void
+			{
+				this.handleBusy(false);
+				this.globals.messagesList.getData(false);
+			}
+
+			protected function addCommentResult_faultHandler(event:FaultEvent):void
+			{
+				this.handleBusy(false);
+			}
+
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<s:CallResponder id="addCommentResult" result="addCommentResult_resultHandler(event)" fault="addCommentResult_faultHandler(event)" />
+		<parabay:Parabay id="parabayService" />
+	</fx:Declarations>	
+	
+	<s:HGroup width="100%" paddingRight="20">
+		
+		<s:Label text="Add a comment" paddingTop="20" fontWeight="bold" />
+		<mx:Spacer width="100%"/>
+		<s:CheckBox id="isPrivate" label="Is Private?" selected="false" />
+	</s:HGroup>
+	<s:HGroup width="100%" paddingRight="20">
+		<s:TextInput id="chatText" width="100%" text="" keyDown="chatText_keyDownHandler(event)"  />
+		<s:Button id="chatButton" width="44" height="44" icon="{assets.chaticon}" click="button2_clickHandler(event)" />		
+
+	</s:HGroup>
+
+</s:VGroup>

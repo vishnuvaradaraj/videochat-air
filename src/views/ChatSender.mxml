@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" width="100%" paddingLeft="5" paddingRight="5" xmlns:assets="assets.*" >
+
+	<fx:Script>
+		<![CDATA[
+			import assets.chaticon;
+			
+			import model.Globals;
+			
+			[Bindable]
+			private var globals:Globals = Globals.getInstance();
+			
+			[Bindable]
+			public var isPrivate :Boolean = true;
+			
+			protected function sendChat():void
+			{
+				trace("Sending chat(enter) :" + chatText.text);
+				globals.p2pSession.chatGroup.chatSend(chatText.text, this.isPrivate);
+				chatText.text = "";				
+			}
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				this.sendChat();
+			}
+			
+			
+			protected function chatText_keyDownHandler(event:KeyboardEvent):void
+			{
+				if (event.keyCode == Keyboard.ENTER)
+				{
+					this.sendChat();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:TextInput id="chatText" width="100%" text="" keyDown="chatText_keyDownHandler(event)" />
+	<assets:chaticon width="44" height="44" click="button2_clickHandler(event)" />
+</s:HGroup>

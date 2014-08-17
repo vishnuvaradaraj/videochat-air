@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:s="library://ns.adobe.com/flex/spark" title="Twitter login" creationComplete="view1_creationCompleteHandler(event)">
+	
+	<s:states>
+		<s:State name="loggedout"/>
+		<s:State name="loggedin"/>
+	</s:states>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.sfhicon;
+			
+			import com.facebook.*;
+			import com.swfjunkie.tweetr.Tweetr;
+			import com.swfjunkie.tweetr.events.TweetEvent;
+			import com.swfjunkie.tweetr.oauth.OAuth;
+			import com.swfjunkie.tweetr.oauth.events.OAuthEvent;
+			
+			import model.Globals;
+			
+			import mx.events.FlexEvent;
+			
+			import p2p.UserObject;
+			
+			//Twitter authentication
+			private var tweetr:Tweetr;
+			private var oauth:OAuth;
+			
+			private var TWITTER_SO:SharedObject;	
+			private var TW_LOGGED_IN:Boolean=false;
+			
+			private var user:Object = new Object();
+			
+			private var globals:Globals = Globals.getInstance();
+			
+			private function initTwitter():void
+			{			
+				TWITTER_SO = SharedObject.getLocal("-twitter-call-3-");
+				
+				tweetr = new Tweetr();
+				tweetr.addEventListener(TweetEvent.COMPLETE, handleTweetEvent);
+				tweetr.addEventListener(TweetEvent.FAILED, handleTweetEvent);
+				
+				oauth = new OAuth();
+				oauth.consumerKey = "DLhGMDdPcs45Z8HoZlChbQ";
+				oauth.consumerSecret = "RxSlfaPbzYGLONoK0VjCuropJ0UbD10eJAlfXX0PLTg";
+				oauth.callbackURL = "http://www.flashmobileblog.com/radar.html";
+				oauth.pinlessAuth = true; 
+				
+				oauth.addEventListener(OAuthEvent.COMPLETE, handleOAuthEvent);
+				oauth.addEventListener(OAuthEvent.ERROR, handleOAuthEvent);
+				
+				if(TWITTER_SO.size!=0)
+				{				
+					oauth.oauthToken = TWITTER_SO.data.token;
+					oauth.oauthTokenSecret = TWITTER_SO.data.secret;
+					this.tweetr.oAuth = oauth;
+					
+					tweetr.getUserDetails(TWITTER_SO.data.userId);
+				}	
+			}
+			
+			private function doLogintoTwitter(event:Event):void
+			{
+				oauth.webView = this.webView.stageWebView;
+				oauth.getAuthorizationRequest();
+			}
+			
+			
+			private function handleTweetEvent(event:TweetEvent):void
+			{
+				switch(event.type)
+				{
+					case TweetEvent.COMPLETE:
+						if(event.info==null)
+						{
+							onUserDetailsLoaded(event);
+						}
+						break;
+					case TweetEvent.FAILED:
+						break;
+				}
+				
+				tweetr.removeEventListener(TweetEvent.COMPLETE, handleTweetEvent);
+				tweetr.removeEventListener(TweetEvent.FAILED, handleTweetEvent);
+			}
+			
+			private function handleOAuthEvent(event:OAuthEvent):void
+			{	
+				if (event.type == OAuthEvent.COMPLETE)
+				{
+					oauth.removeEventListener(OAuthEvent.COMPLETE, handleOAuthEvent);
+					oauth.removeEventListener(OAuthEvent.ERROR, handleOAuthEvent);
+					
+					tweetr.oAuth = oauth;
+					
+					TWITTER_SO.data.token = oauth.oauthToken;
+					TWITTER_SO.data.secret = oauth.oauthTokenSecret;
+					TWITTER_SO.data.userId = oauth.userId;
+					TWITTER_SO.data.username = oauth.username;
+					var status:String = TWITTER_SO.flush(4096);
+					
+					tweetr.getUserDetails(TWITTER_SO.data.userId);
+				}
+			}	
+			
+			private function onUserDetailsLoaded(event:TweetEvent):void
+			{			
+				//Here we can popup tweets from users
+				if(event.responseArray[0]!=null)
+				{		
+					TW_LOGGED_IN=true;
+					
+					var twitterUser:Object =null;
+					if(event.responseArray[0].hasOwnProperty("user"))
+						twitterUser = event.responseArray[0].user;
+					else
+						twitterUser = event.responseArray[0];
+										
+					this.globals.currentUser = new UserObject();
+					this.globals.currentUser.nick = twitterUser.screenName;
+					this.globals.currentUser.realName = twitterUser.name;
+					this.globals.currentUser.deviceType = Capabilities.cpuArchitecture;
+					this.globals.currentUser.photo = twitterUser.profileImageUrl;	
+					this.globals.currentUser.description = twitterUser.description;
+					
+					globals.userManager.login(this.globals.currentUser);
+
+					this.removeElement(this.webView);
+					this.webView.stageWebView.dispose();
+					
+					navigator.popAll();
+					navigator.pushView(views.GroupUsersPage);
+				}
+			}		
+			protected function handleLoggedIn(event:MouseEvent):void
+			{		
+				trace("Twitter logged in");
+			}
+
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.initTwitter();
+				this.doLogintoTwitter(null);
+			}
+			
+		]]>
+	</fx:Script>
+	<components:WebView xmlns:components="components.*" id="webView" />
+
+</s:View>
